@@ -29,3 +29,9 @@ build: ## build bento docker images then deploy on 5000
 	
 run: ## run docker images
 	docker run -p 5000:5000 profanity-filter:latest
+
+torch: ## install torch with poetry
+	if [[ ! -f ./venv/torch.whl ]]; then \
+		curl -o ./venv/torch.whl https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38-linux_x86_64.whl; \
+	fi
+	poetry add ./venv/torch.whl
