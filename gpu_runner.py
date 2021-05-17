@@ -18,13 +18,16 @@ def serve_gpu(model: Optional[nn.Module] = None,
     def decorator(fn: Callable) -> Callable:
         @wraps(fn)
         def wrapper(model_instance, *args, **kwargs):
+            print('before\n')
             device = torch.device(f'cuda:{gpu_id}' if torch.cuda.is_available() else "cpu")
             model_instance = model_instance.to(device)
             model_instance.eval()
+            print('after\n')
             return model_instance
 
+        print(f'decorating {fn} with model {[i for i in model.state_dict()]} and GPU: {gpu_id}')
         if not isinstance(model, nn.Module) or model is None:
             raise EnvironmentError("model is not of type torch.nn.Module or given model is None.")
-        return wrapper(model)
+        return wrapper
 
     return decorator

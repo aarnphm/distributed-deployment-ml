@@ -1,31 +1,17 @@
-from typing import Dict
-
-import flask
-import torch
-from flask import jsonify, Flask, request
-import logging
-from transformers import pipeline, AutoTokenizer, AutoConfig
-from model import BERT
-from gpu_runner import serve_gpu
-from args import model_name_or_path
 import os
+import torch
+import flask
+from flask import jsonify, Flask
+import logging
+from transformers import AutoTokenizer, AutoConfig
+from model import BertForSentimentClassification
+from gpu_runner import serve_gpu
+from args import model_name_or_path, rank, world_size
 
 app = Flask(__name__)
-app.config.from_object(__name__)
-classifier = pipeline("zero-shot-classification")
 
-
-def news_categorization(text) -> Dict:
-    categories = [
-        "War",
-        "Sports",
-        "Business",
-        "Science",
-        "Biology",
-        "News"
-    ]
-    res = classifier(text, categories, multi_label=True)
-    return dict((key, value) for key, value in zip(res['labels'], res['scores']))
+# BERT = wrap_ddp(BSC.from_pretrained(model_name_or_path), rank, world_size)
+BERT = BertForSentimentClassification.from_pretrained(model_name_or_path)
 
 
 def classify_sentiment(model, text):
@@ -55,21 +41,9 @@ def health_check():
 @serve_gpu(model=BERT, gpu_id=0)
 @app.route('/api/sentiment', methods=['POST'])
 def sentiment():
-    text = request.args['text']
+    text = flask.request.form['text']
     sent, prob = classify_sentiment(BERT, text)
     return jsonify({'sentiment': sent, 'prob': prob}), 200
-
-
-# we use transformers.pipeline for this task
-@app.route('/api/categorize', methods=['POST'])
-def categorize():
-    data = flask.request.form
-    text = data['text']
-    print(f"got categorization request of length {len(text)}")
-    if len(text) < 10:
-        return "too short", 400
-
-    return jsonify(news_categorization(text)), 200
 
 
 if __name__ == '__main__':

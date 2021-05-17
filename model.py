@@ -2,8 +2,6 @@ import torch.nn as nn
 import torch.distributed as distributed
 from torch.nn.parallel.distributed import DistributedDataParallel
 from transformers import BertPreTrainedModel, BertModel
-from args import model_name_or_path, rank, world_size
-
 
 class BertForSentimentClassification(BertPreTrainedModel):
     def __init__(self, config):
@@ -14,12 +12,12 @@ class BertForSentimentClassification(BertPreTrainedModel):
         self.cls_layer = nn.Linear(config.hidden_size, 1)
 
     def forward(self, input_ids, attention_mask):
-        '''
-		Inputs:
-			-input_ids : Tensor of shape [B, T] containing token ids of sequences
-			-attention_mask : Tensor of shape [B, T] containing attention masks to be used to avoid contibution of PAD tokens
-			(where B is the batch size and T is the input length)
-		'''
+        """
+        :param input_ids: Tensor of shape [B, T] containing token ids of sequences
+        :param attention_mask: Tensor of shape [B, T] containing attention masks to be used to avoid contribution of
+               PAD tokens.
+        :return: logits
+        """
         # Feed the input to Bert model to obtain outputs
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
         # Obtain the representations of [CLS] heads
@@ -34,6 +32,3 @@ def wrap_ddp(model: nn.Module, rank: int, world_size: int):
     ddp_model = DistributedDataParallel(model, device_ids=[rank])
     return ddp_model
 
-
-# BERT = wrap_ddp(BSC.from_pretrained(model_name_or_path), rank, world_size)
-BERT = BSC.from_pretrained(model_name_or_path)
