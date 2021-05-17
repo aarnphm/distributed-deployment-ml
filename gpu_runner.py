@@ -8,7 +8,7 @@ import torch.nn as nn
 def serve_gpu(model: Optional[nn.Module] = None,
               gpu_id: Optional[int] = 0):
     """
-    serve_gpu is a decorator that enables users to enable users to run inference on GPU  with given framework
+    serve_gpu is a decorator that enables users to enable users to run_forever inference on GPU  with given framework
 
     :param model: our model instance, using Pytorch as default, (will add tf support beyond)
     :param gpu_id: # of gpu instance, default to 1

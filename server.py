@@ -1,16 +1,23 @@
-import os
-import torch
-import flask
-from flask import jsonify, Flask
 import logging
-from transformers import AutoTokenizer, AutoConfig
-from model import BertForSentimentClassification
+import os
+
+import flask
+import torch
+from flask import jsonify, Flask
+from gevent import monkey
+
+monkey.patch_all()
+from gevent.pywsgi import WSGIServer
+from transformers import AutoTokenizer
+
+from args import model_name_or_path
+from dispatcher import Dispatcher
 from gpu_runner import serve_gpu
-from args import model_name_or_path, rank, world_size
+from model import BertForSentimentClassification, ManagedBertModel
 
 app = Flask(__name__)
+model, dispatcher = None, None
 
-# BERT = wrap_ddp(BSC.from_pretrained(model_name_or_path), rank, world_size)
 BERT = BertForSentimentClassification.from_pretrained(model_name_or_path)
 
 
@@ -46,8 +53,15 @@ def sentiment():
     return jsonify({'sentiment': sent, 'prob': prob}), 200
 
 
+# @app.route('/api/distributed', methods=['POST'])
+# def distributed():
+#     inputs = flask.request.form.getlist('s')
+#     return jsonify(dispatcher.predict(inputs)), 200
+
+
 if __name__ == '__main__':
     # init our tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-
+    # dispatcher = Dispatcher(ManagedBertModel, batch_size=64, worker_num=2, cuda_devices=(0,))
     app.run(host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 5000)))
+    # WSGIServer(("0.0.0.0", 5005), app).serve_forever()

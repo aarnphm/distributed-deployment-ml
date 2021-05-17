@@ -102,7 +102,7 @@ class Worker:
     def _send_resp(self, client_id, task_id, req_id, model_input):
         raise NotImplementedError
 
-    def run(self, *args, **kwargs):
+    def run_forever(self, *args, **kwargs):
         self._pid = os.getpid()
         logger.info(f"[gpu worker {self._pid}] {self} running")
 
@@ -143,7 +143,8 @@ class Worker:
             self._send_resp(client_id, task_id, request_id, model_outputs[i])
 
         batch_size = len(batch)
-        logger.info(f"[gpu worker {self._pid}] _start_once batch_size: {batch_size} start_at: {start_time} spend: {time.time()-start_time:.4f}"
+        logger.info(
+            f"[gpu worker {self._pid}] _start_once batch_size: {batch_size} start_at: {start_time} spend: {time.time() - start_time:.4f}")
         return batch_size
 
 
@@ -157,7 +158,7 @@ class DispatchWorker(Worker):
         self._model_args = model_args or []
         self._model_kwargs = model_kwargs or {}
 
-    def run(self, gpu_id=None, ready_event=None, destroy_event=None):
+    def run_forever(self, gpu_id=None, ready_event=None, destroy_event=None):
         if isinstance(self._predict, type) and issubclass(self._predict, Manager):
             model_class = self._predict
             logger.info(f"[gpu worker {os.getpid()}] init model on cuda:{gpu_id}")
@@ -169,7 +170,7 @@ class DispatchWorker(Worker):
             ready_event.set()
         if destroy_event:
             self._destroy_event = destroy_event
-        super().run()
+        super().run_forever()
 
     def _recv_req(self, timeout=TIMEOUT):
         try:
@@ -185,7 +186,7 @@ class DispatchWorker(Worker):
 
 class Dispatcher(Base):
     def __init__(self, predict_fn_or_model, batch_size, max_latency=0.1,
-                 worker_num: Optional[int]=1, cuda_devices: Optional[Tuple[int]]=None,
+                 worker_num: Optional[int] = 1, cuda_devices: Optional[Tuple[int]] = None,
                  model_args=None, model_kwargs=None, wait_for_worker_ready=False,
                  mp_start_method='spawn', worker_timeout=WORKER_TIMEOUT):
         super(Dispatcher, self).__init__(worker_timeout)
@@ -209,11 +210,11 @@ class Dispatcher(Base):
             ready_event = self.mp.Event()
             destroy_event = self.mp.Event()
             if self.cuda_devices is not None:
-                gpu_id = self.cuda_devices[i%len(self.cuda_devices)]
+                gpu_id = self.cuda_devices[i % len(self.cuda_devices)]
                 args = (gpu_id, ready_event, destroy_event)
             else:
                 args = (None, ready_event, destroy_event)
-            p = self.mp.Process(target=self._worker.run, args=args, name="dispatcher_worker", daemon=True)
+            p = self.mp.Process(target=self._worker.run_forever, args=args, name="dispatcher_worker", daemon=True)
             p.start()
             self._worker_ps.append(p)
             self._worker_ready_events.append(ready_event)
@@ -245,7 +246,3 @@ class Dispatcher(Base):
             if p.is_alive():
                 raise TimeoutError("worker_process destroy timeout")
         logger.info("workers destroyed")
-
-
-
-
