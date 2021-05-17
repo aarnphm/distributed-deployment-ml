@@ -47,8 +47,7 @@ def sentiment():
 
 
 if __name__ == '__main__':
-    config = AutoConfig.from_pretrained(model_name_or_path)
     # init our tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
-    app.run(host="0.0.0.0",debug=True, port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 5000)))
