@@ -1,36 +1,27 @@
-.PHONY := all
+.DEFAULT_GOAL: prep
 
-.DEFAULT_GOAL := build
-
-all: help build
-
-DEPLOY_DIR := deploy
-SVC_DIR := $(HOME)/bentoml/repository/ProfanityFilterService
-DOT_DATA := $(DEPLOY_DIR)/ProfanityFilterService/.data
-
-# ls -ltr $(SVC_DIR) | grep '^d' | tail -1 | awk '{print $(NF)}'
-LATEST := $(shell ls -t -- $(SVC_DIR)/* | head -n1 | cut -d ':' -f1)
-
+.PHONY: help
 help: ## List of defined target
 	@grep -E '^[a-zA-Z_-]+:.*?##.*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'	
 
-prep: ## Prepare embedding, using GloVe
-	cd src && python train.py $(ARGS)
+.PHONY: run
+run:
+	python -m torch.distributed.launch --nproc_per_node=1 server.py
 
-init: prep ## package trained model to bento
-	cd src && python packer.py
+.PHONY: guni
+guni:
+	gunicorn --bind 0.0.0.0:5000 server:app --log-level=debug -t 120 --workers=4
 
-build: ## build bento docker images then deploy on 5000
-	rm -rf $(DEPLOY_DIR) && cp -r $(LATEST) $(DEPLOY_DIR) && mkdir $(DOT_DATA)
-	cp -r src/.data/{aclImdb,aclImdb_v1.tar.gz,glove.6B.50d.txt}  $(DOT_DATA)	
-	cp src/requirements.txt $(DEPLOY_DIR) && cp src/config.yml $(DEPLOY_DIR)/ProfanityFilterService
-	echo 'pip install torch==1.6.0+cpu -f https://download.pytorch.org/whl/torch_stable.html' >> $(DEPLOY_DIR)/bentoml-init.sh
-	cd $(DEPLOY_DIR) && docker build -t profanity-filter:latest .
-	
-run: ## run docker images
-	docker run -p 5000:5000 profanity-filter:latest
+.PHONY: categorize
+categorize:
+	curl -X POST localhost:5000/api/categorize --form 'text=The root of the latest escalation was intense disputes over East Jerusalem. Israeli police prevented Palestinians from gathering near one of the city’s ancient gates during the holy month of Ramadan, as they had customarily. At the same time, Palestinians faced eviction by Jewish landlords from homes in East Jerusalem. Many Arabs called it part of a wider Israeli campaign to force Palestinians out of the city, describing it as ethnic cleansing.'
 
-torch: ## install torch with poetry
+.PHONY: sentiment
+sentiment:
+	curl -X POST localhost:5000/api/sentiment --form 'text=When in the Course of human events, it becomes necessary for one people to dissolve the political bands which have connected them with another, and to assume among the powers of the earth, the separate and equal station to which the Laws of Nature and of Nature God entitle them, a decent respect to the opinions of mankind requires that they should declare the causes which impel them to the separation.'
+
+.PHONY: poetry-torch
+poetry-torch:
 	if [[ ! -f ./venv/torch.whl ]]; then \
 		curl -o ./venv/torch.whl https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38-linux_x86_64.whl; \
 	fi
