@@ -49,10 +49,10 @@ def sentiment():
     return jsonify({'sentiment': sent, 'prob': prob}), 200
 
 
-@dispatcher(ManagedBertModel)
+# @dispatcher(ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,))
 @app.route('/api/distributed', methods=['POST'])
 def distributed():
-    inputs = flask.request.form['text']
+    inputs = flask.request.form.getlist('text')
     return jsonify(dispatch.predict(inputs)), 200
 
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     # init our tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     dispatch = Dispatcher(
-        ManagedBertModel, batch_size=64, worker_num=2, cuda_devices=(0,)
+        ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,)
     )
     # app.run(host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 5000)))
     WSGIServer(("0.0.0.0", 5000), app).serve_forever()

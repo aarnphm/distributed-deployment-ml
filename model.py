@@ -72,22 +72,18 @@ class ManagedBertModel(Manager):
         super(ManagedBertModel, self).__init__(model)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
-    def predict(self, *args, **kwargs) -> float:
-        text = kwargs.get("text")
-        if text == "":
-            raise RuntimeError("input cannot be emptied.")
-        with torch.no_grad():
-            tokens = self.tokenizer.tokenize(text)
-            tokens = ['[CLS]'] + tokens + ['[SEP]']
-            tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-            seq = torch.tensor(tokens_ids)
-            seq = seq.unsqueeze(0)
-            attn_mask = (seq != 0).long()
-            logit = self.model(seq, attn_mask)
-            prob = torch.sigmoid(logit.unsqueeze(-1))
-            prob = prob.item()
-            soft_prob = prob > 0.5
-            if soft_prob == 1:
-                return prob
-            else:
-                return 1 - prob
+    def predict(self, batch) -> List:
+        batch_outputs = []
+        for text in batch:
+            with torch.no_grad():
+                tokens = self.tokenizer.tokenize(text)
+                tokens = ['[CLS]'] + tokens + ['[SEP]']
+                tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+                seq = torch.tensor(tokens_ids)
+                seq = seq.unsqueeze(0)
+                attn_mask = (seq != 0).long()
+                logit = self.model(seq, attn_mask)
+                prob = torch.sigmoid(logit.unsqueeze(-1))
+                prob = prob.item()
+                batch_outputs.append(prob)
+        return batch_outputs

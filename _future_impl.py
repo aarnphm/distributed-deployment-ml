@@ -1,6 +1,7 @@
 import threading
 
 
+# asyncio.Future implementation
 class FutureImpl:
     def __init__(self, task_id, task_size, future_cache_ref):
         self._id = task_id

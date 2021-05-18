@@ -63,46 +63,39 @@ Dispatcher acts as a middleware to dynamically allocating # of GPUs for certain 
 ## Usecases:
 
 ```python
-    
     # model.py
     class ManagedBertModel(Manager):
-    def __init__(self):
-        super(ManagedBertModel, self).__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+        def __init__(self, model=BertForSentimentClassification):
+            super(ManagedBertModel, self).__init__(model)
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
-    def setup_model(self, *args, **kwargs):
-        self.model = BertForSentimentClassification.from_pretrained(model_name_or_path)
-
-    def predict(self, batch):
-        with torch.no_grad():
-            tokens = self.tokenizer.tokenize(batch)
-            tokens = ['[CLS]'] + tokens + ['[SEP]']
-            tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-            seq = torch.tensor(tokens_ids)
-            seq = seq.unsqueeze(0)
-            attn_mask = (seq != 0).long()
-            logit = self.model(seq, attn_mask)
-            prob = torch.sigmoid(logit.unsqueeze(-1))
-            prob = prob.item()
-            soft_prob = prob > 0.5
-            if soft_prob == 1:
-                return [int(prob*100)]
-            else:
-                return [int(100 - prob * 100)]
+        def predict(self, batch) -> List:
+            batch_outputs = []
+            for text in batch:
+                with torch.no_grad():
+                    tokens = self.tokenizer.tokenize(text)
+                    tokens = ['[CLS]'] + tokens + ['[SEP]']
+                    tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+                    seq = torch.tensor(tokens_ids)
+                    seq = seq.unsqueeze(0)
+                    attn_mask = (seq != 0).long()
+                    logit = self.model(seq, attn_mask)
+                    prob = torch.sigmoid(logit.unsqueeze(-1))
+                    prob = prob.item()
+                    batch_outputs.append(prob)
+            return batch_outputs
 
     # server.py
     from dispatcher import Dispatcher
     from model import ManagedBertModel
-     
-    ...
-
+    
+    @dispatcher(ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,))
     @app.route('/api/distributed', methods=['POST'])
     def distributed():
         inputs = flask.request.form.getlist('text')
         return jsonify(dispatcher.predict(inputs)), 200
 
     if __name__ == '__main__':
-        dispatcher = Dispatcher(ManagedBertModel, batch_size=64, worker_num=2, cuda_devices=(0,))
         WSGIServer(("0.0.0.0", 5000), app).serve_forever()
 ```
 

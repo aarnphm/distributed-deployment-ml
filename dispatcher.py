@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 from model import Manager
-from worker import Base, Worker
+from _worker import DispatcherBase, Worker
 
 from args import logger, TIMEOUT, WORKER_TIMEOUT
 
@@ -17,6 +17,7 @@ class DispatchWorker(Worker):
     def __init__(
         self,
         predict_fn_or_model: Union[nn.Module, Callable],
+        model_torch_or_tf: Union[nn.Module],
         batch_size,
         max_latency,
         req_queue,
@@ -36,6 +37,7 @@ class DispatchWorker(Worker):
                 "cannot support current model. Remember to wraps Manager."
             )
         self._model = None
+        self._model_torch = model_torch_or_tf
         self._req_queue = req_queue
         self._resp_queue = resp_queue
         self._model_args = model_args or []
@@ -47,8 +49,7 @@ class DispatchWorker(Worker):
             if not torch.cuda.is_available():
                 raise ValueError("cannot run dispatch worker without a nvidia gpus.")
             logger.info(f"[gpu worker {os.getpid()}] init model on cuda:{gpu_id}")
-            self._model = model_class(gpu_id=gpu_id)
-            logger.info(f"[gpu worker {os.getpid()}] init model on cuda:{gpu_id}")
+            self._model = model_class(model=self._model_torch, gpu_id=gpu_id)
             self._predict = self._model.predict
         if ready_event:
             ready_event.set()
@@ -68,10 +69,11 @@ class DispatchWorker(Worker):
         self._resp_queue.put((task_id, req_id, model_input))
 
 
-class Dispatcher(Base):
+class Dispatcher(DispatcherBase):
     def __init__(
         self,
         predict_fn_or_model,
+        model_torch_or_tf,
         batch_size,
         max_latency=0.1,
         worker_num: Optional[int] = 1,
@@ -81,8 +83,10 @@ class Dispatcher(Base):
         wait_for_worker_ready=False,
         mp_start_method='spawn',
         worker_timeout=WORKER_TIMEOUT,
+        *args,
+        **kwargs,
     ):
-        super(Dispatcher, self).__init__(worker_timeout)
+        super(Dispatcher, self).__init__(worker_timeout, *args, **kwargs)
         self.worker_num = worker_num
         self.cuda_devices = cuda_devices
         self.mp = multiprocessing.get_context(mp_start_method)
@@ -90,6 +94,7 @@ class Dispatcher(Base):
         self._output_queue = self.mp.Queue()
         self._worker = DispatchWorker(
             predict_fn_or_model,
+            model_torch_or_tf,
             batch_size,
             max_latency,
             self._input_queue,
@@ -155,6 +160,7 @@ class Dispatcher(Base):
 
 def dispatcher(
     predict_fn_or_model: Optional[Callable] = None,
+    model_torch_or_tf: Optional[Callable] = None,
     batch_size: Optional[int] = None,
     max_latency: Optional[Union[int, float]] = 0.1,
     worker_num: Optional[int] = 1,
@@ -165,20 +171,26 @@ def dispatcher(
     mp_start_method: Optional[str] = 'spawn',
     worker_timeout: Optional[int] = WORKER_TIMEOUT,
 ):
-    @wraps(predict_fn_or_model)
-    def decorator(model_fn):
-        return Dispatcher(
-            model_fn,
-            batch_size,
-            max_latency,
-            worker_num=worker_num,
-            cuda_devices=cuda_devices,
-            model_args=model_args,
-            model_kwargs=model_kwargs,
-            wait_for_worker_ready=wait_for_worker_ready,
-            mp_start_method=mp_start_method,
-            worker_timeout=worker_timeout,
-        )
+    def decorator(model_fn: Callable) -> Callable:
+        @wraps(predict_fn_or_model)
+        def wrapper(*args, **kwargs):
+            return Dispatcher(
+                model_fn,
+                model_torch_or_tf,
+                batch_size,
+                max_latency,
+                worker_num=worker_num,
+                cuda_devices=cuda_devices,
+                model_args=model_args,
+                model_kwargs=model_kwargs,
+                wait_for_worker_ready=wait_for_worker_ready,
+                mp_start_method=mp_start_method,
+                worker_timeout=worker_timeout,
+                *args,
+                **kwargs,
+            )
+
+        return wrapper
 
     return (
         decorator(predict_fn_or_model) if callable(predict_fn_or_model) else decorator

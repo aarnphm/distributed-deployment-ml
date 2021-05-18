@@ -1,18 +1,16 @@
 import os
-import uuid
 import threading
 import time
 import uuid
 import weakref
 from typing import List
 
-from future_impl import FutureCache, FutureImpl
-
 from args import logger, TIMEOUT, WORKER_TIMEOUT, SLEEP
+from _future_impl import FutureCache, FutureImpl
 
 
-class Base:
-    # Base shouldn't get exposed to others to call
+class DispatcherBase:
+    # DispatcherBase is our base representation for all dispatcher class.
     def __init__(self, *args, **kwargs):
         super().__init__()
         self._task_id = 0
@@ -29,6 +27,8 @@ class Base:
         self.back_thread.start()
 
     def _send_req(self, task_id, request_id, model_input):
+        # we will then send given task_id and request_id from flask with given model_input
+        # downstream to our Manger to handle inference
         raise NotImplementedError
 
     def _recv_resp(self, timeout=TIMEOUT):
