@@ -8,6 +8,7 @@ import weakref
 from queue import Empty
 from typing import List, Callable, Union, Tuple, Optional
 
+import torch
 import torch.nn as nn
 
 from future_impl import FutureCache, FutureImpl
@@ -153,6 +154,7 @@ class DispatchWorker(Worker):
                  batch_size, max_latency, req_queue, resp_queue, model_args,
                  model_kwargs, *args, **kwargs):
         super(DispatchWorker, self).__init__(predict_fn_or_model, batch_size, max_latency, *args, **kwargs)
+        self._model = None
         self._req_queue = req_queue
         self._resp_queue = resp_queue
         self._model_args = model_args or []
@@ -161,6 +163,8 @@ class DispatchWorker(Worker):
     def run_forever(self, gpu_id=None, ready_event=None, destroy_event=None):
         if isinstance(self._predict, type) and issubclass(self._predict, Manager):
             model_class = self._predict
+            if not torch.cuda.is_available():
+                raise ValueError("cannot run dispatch worker without a nvidia gpus.")
             logger.info(f"[gpu worker {os.getpid()}] init model on cuda:{gpu_id}")
             self._model = model_class(gpu_id)
             self._model.setup_model(*self._model_args, **self._model_kwargs)

@@ -2,7 +2,7 @@ from typing import List
 
 import torch
 import torch.nn as nn
-from transformers import BertPreTrainedModel, BertModel
+from transformers import BertPreTrainedModel, BertModel, AutoTokenizer
 
 from args import model_name_or_path
 from manager import Manager
@@ -33,9 +33,26 @@ class BertForSentimentClassification(BertPreTrainedModel):
 
 
 class ManagedBertModel(Manager):
+    def __init__(self):
+        super(ManagedBertModel, self).__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
     def setup_model(self, *args, **kwargs):
         self.model = BertForSentimentClassification.from_pretrained(model_name_or_path)
 
     def predict(self, batch):
-        return self.model(batch)
+        with torch.no_grad():
+            tokens = self.tokenizer.tokenize(batch)
+            tokens = ['[CLS]'] + tokens + ['[SEP]']
+            tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+            seq = torch.tensor(tokens_ids)
+            seq = seq.unsqueeze(0)
+            attn_mask = (seq != 0).long()
+            logit = self.model(seq, attn_mask)
+            prob = torch.sigmoid(logit.unsqueeze(-1))
+            prob = prob.item()
+            soft_prob = prob > 0.5
+            if soft_prob == 1:
+                return [int(prob*100)]
+            else:
+                return [int(100 - prob * 100)]
