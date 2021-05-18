@@ -3,15 +3,19 @@ _a demo for enabling GPU inference for model serving_
 
 ## Background
 
-_assumption: end user should train their model with CUDA-enabled in order to serve with GPU.
-refers to [PyTorch's tutorial on training on GPU](https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#training-on-gpu) or [Tensorflow's guide on distributed training](https://www.tensorflow.org/guide/distributed_training)_
+_assumption: end user should train their model with CUDA-enabled in order to serve with GPU. Please refers to [PyTorch's tutorial on training on GPU](https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#training-on-gpu) or [Tensorflow's guide on distributed training](https://www.tensorflow.org/guide/distributed_training)_
+
+- refers to [rentainhe's tutorial](https://github.com/rentainhe/pytorch-distributed-training) on distributed training for PyTorch with `apex`
 
 > Why do we want to enable GPU for inference?
 
 -  deals with a smaller batch of inputs, which is different from training --> focus on minimizing e2e response time.
 - [This blog post](https://developer.nvidia.com/blog/inference-next-step-gpu-accelerated-deep-learning/) talks more in dept of how deep neural network can utilize performance of GPUs vs. CPUs
+- [This blog post](http://matthewrocklin.com/blog/work/2016/09/13/dask-and-celery) compares Python distributed task processing system, `dask.distributed` and `celery`
 
 ## Proposal
+
+<img src="./utils/worker-proposal.svg" width="100%" height="200" alt="worker-proposal">
 
 Dispatcher acts as a middleware to dynamically allocating # of GPUs for certain model. This will help users to statically allocate sets of GPUs for a model
 

@@ -22,8 +22,12 @@ class FutureImpl:
         if future_cache is not None:
             del future_cache[self._id]
 
-        self._outputs.sort(key=lambda i: i[0])  # we will sort by req_id [[req_id, output], ...]
-        return [i[1] for i in self._outputs]  # we will then return output from our batch result
+        self._outputs.sort(
+            key=lambda i: i[0]
+        )  # we will sort by req_id [[req_id, output], ...]
+        return [
+            i[1] for i in self._outputs
+        ]  # we will then return output from our batch result
 
     def done(self):
         if self._finish_event.is_set():
@@ -37,4 +41,5 @@ class FutureImpl:
 
 class FutureCache(dict):
     """A dict for weakref only"""
+
     pass
