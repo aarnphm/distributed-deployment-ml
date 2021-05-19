@@ -7,7 +7,7 @@ from typing import List, Callable, Union, Tuple, Optional
 import torch
 import torch.nn as nn
 
-from model import Manager
+from manager import Manager
 from _worker import DispatcherBase, Worker
 
 from args import logger, TIMEOUT, WORKER_TIMEOUT
@@ -213,15 +213,14 @@ def serve_gpu(model: Optional[nn.Module] = None, gpu_id: Optional[int] = 0):
                 f'cuda:{gpu_id}' if torch.cuda.is_available() else "cpu"
             )
             model_instance = model_instance.to(device)
+            print(device)
             model_instance.eval()
             return model_instance
 
         # [i for i in model.state_dict()]
-        print(f'decorating {fn} with model {model} and GPU: {gpu_id}')
-        if not isinstance(model, nn.Module) or model is None:
-            raise EnvironmentError(
-                "model is not of type torch.nn.Module or given model is None."
-            )
+        print(f'decorating {fn} with model {model.modules()} and GPU: {gpu_id}')
+        if not isinstance(model, nn.Module):
+            raise RuntimeError("model is not of type nn.Module")
         return wrapper(model)
 
     return decorator

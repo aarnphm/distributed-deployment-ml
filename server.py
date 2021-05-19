@@ -4,12 +4,11 @@ import os
 import flask
 import torch
 from flask import jsonify, Flask
-from gevent.pywsgi import WSGIServer
 from transformers import AutoTokenizer
 
 from args import model_name_or_path
-from dispatcher import Dispatcher, dispatcher, serve_gpu
-from model import BertForSentimentClassification, ManagedBertModel
+from dispatcher import serve_gpu
+from model import BertForSentimentClassification
 
 app = Flask(__name__)
 model, dispatch = None, None
@@ -41,26 +40,26 @@ def health_check():
     return jsonify({'status': 'healthy'}), 200
 
 
-@serve_gpu(model=BERT, gpu_id=0)
 @app.route('/api/sentiment', methods=['POST'])
 def sentiment():
     text = flask.request.form['text']
-    sent, prob = classify_sentiment(BERT, text)
+    model = serve_gpu(model=BERT, gpu_id=0)
+    sent, prob = classify_sentiment(model, text)
     return jsonify({'sentiment': sent, 'prob': prob}), 200
 
 
 # @dispatcher(ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,))
-@app.route('/api/distributed', methods=['POST'])
-def distributed():
-    inputs = flask.request.form.getlist('text')
-    return jsonify(dispatch.predict(inputs)), 200
+# @app.route('/api/distributed', methods=['POST'])
+# def distributed():
+#     inputs = flask.request.form.getlist('text')
+#     return jsonify(dispatch.predict(inputs)), 200
 
 
 if __name__ == '__main__':
     # init our tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-    dispatch = Dispatcher(
-        ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,)
-    )
-    # app.run(host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 5000)))
-    WSGIServer(("0.0.0.0", 5000), app).serve_forever()
+    # dispatch = Dispatcher(
+    #     ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,)
+    # )
+    app.run(host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 5000)))
+    # WSGIServer(("0.0.0.0", 5000), app).serve_forever()
