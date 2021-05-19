@@ -3,7 +3,6 @@ from tensorflow.keras.models import Sequential
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from transformers import BertPreTrainedModel, BertModel
 

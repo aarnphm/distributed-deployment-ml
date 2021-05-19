@@ -1,7 +1,7 @@
 from bentoml import BentoService, api, artifacts, env
 from bentoml.adapters import JsonInput
-from bentoml.handlers import JsonHandler
 from bentoml.frameworks.keras import KerasModelArtifact
+from bentoml.frameworks.transformers import TransformersModelArtifact
 from bentoml.frameworks.pytorch import PytorchModelArtifact
 from bentoml.service.artifacts.common import PickleArtifact
 from tensorflow.keras.preprocessing import sequence, text
@@ -24,7 +24,7 @@ class TensorflowService(BentoService):
         tokens = list(map(self.word_to_index, proc))
         return tokens
 
-    @api(JsonHandler)
+    @api(input=JsonInput())
     def predict(self, parsed_json):
         # single pred
         raw = self.preprocessing(parsed_json['text'])
@@ -34,7 +34,7 @@ class TensorflowService(BentoService):
 
 
 @env(infer_pip_packages=True)
-@artifacts([PytorchModelArtifact("bert")])
+@artifacts([TransformersModelArtifact("bert")])
 class TransformersService(BentoService):
     @api(input=JsonInput(), batch=False)
     def predict(self, parsed_json):
