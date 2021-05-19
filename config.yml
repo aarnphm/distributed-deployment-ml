@@ -1,0 +1,14 @@
+seed: 1234
+max_len: 500
+max_size: 25000
+batch_size: 256
+pad_token: "<pad>"
+unk_token: "<unk>"
+emb_dim: 100
+hid_dim: 256
+output_dim: 2
+n_layers: 2
+dropout: 0.5
+n_epochs: 10
+
+model_name: "torchlstm"

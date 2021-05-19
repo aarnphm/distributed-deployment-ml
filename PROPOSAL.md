@@ -61,38 +61,41 @@ Dispatcher acts as a middleware to dynamically allocating # of GPUs for certain 
 
 ```python
     # manager.py
-    class ManagedBertModel(Manager):
-        def __init__(self, model=BertForSentimentClassification):
-            super(ManagedBertModel, self).__init__(model)
-            self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+class ManagedBertModel(Manager):
+    def __init__(self, model=TransformersBert):
+        super(ManagedBertModel, self).__init__(model)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
-        def predict(self, batch) -> List:
-            batch_outputs = []
-            for text in batch:
-                with torch.no_grad():
-                    tokens = self.tokenizer.tokenize(text)
-                    tokens = ['[CLS]'] + tokens + ['[SEP]']
-                    tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-                    seq = torch.tensor(tokens_ids)
-                    seq = seq.unsqueeze(0)
-                    attn_mask = (seq != 0).long()
-                    logit = self.model(seq, attn_mask)
-                    prob = torch.sigmoid(logit.unsqueeze(-1))
-                    prob = prob.item()
-                    batch_outputs.append(prob)
-            return batch_outputs
+    def predict(self, batch) -> List:
+        batch_outputs = []
+        for text in batch:
+            with torch.no_grad():
+                tokens = self.tokenizer.tokenize(text)
+                tokens = ['[CLS]'] + tokens + ['[SEP]']
+                tokens_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+                seq = torch.tensor(tokens_ids)
+                seq = seq.unsqueeze(0)
+                attn_mask = (seq != 0).long()
+                logit = self.model(seq, attn_mask)
+                prob = torch.sigmoid(logit.unsqueeze(-1))
+                prob = prob.item()
+                batch_outputs.append(prob)
+        return batch_outputs
 
-    # server.py
-    from dispatcher import Dispatcher
-    from model import ManagedBertModel
-    
-    @dispatcher(ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,))
-    @app.route('/api/distributed', methods=['POST'])
-    def distributed():
-        inputs = flask.request.form.getlist('text')
-        return jsonify(dispatcher.predict(inputs)), 200
 
-    if __name__ == '__main__':
-        WSGIServer(("0.0.0.0", 5000), app).serve_forever()
+# server.py
+from dispatcher import Dispatcher
+from transformer.model import ManagedBertModel
+
+
+@dispatcher(ManagedBertModel, BERT, batch_size=64, worker_num=2, cuda_devices=(0,))
+@app.route('/api/distributed', methods=['POST'])
+def distributed():
+    inputs = flask.request.form.getlist('text')
+    return jsonify(dispatcher.predict(inputs)), 200
+
+
+if __name__ == '__main__':
+    WSGIServer(("0.0.0.0", 5000), app).serve_forever()
 ```
 

@@ -1,6 +1,8 @@
 # distributed-deployment-ml
-_a demo for enabling GPU inference for model serving_
+<i>WIP GPU supports for BentoML</i>
 
-# Notes
+## Notes
 
 refers to [PROPOSAL.md](./PROPOSAL.md) for a automatic distribution proposal.
+
+- BentoML service packer can be found under [bento_service.py](./bento_service.py)
