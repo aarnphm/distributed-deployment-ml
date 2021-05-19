@@ -29,3 +29,6 @@ poetry-torch:
 		curl -o ./venv/torch.whl https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38-linux_x86_64.whl; \
 	fi
 	poetry add ./venv/torch.whl
+
+tf-d-i:
+	docker run --gpus all -it tensorflow/tensorflow:latest-gpu bash
