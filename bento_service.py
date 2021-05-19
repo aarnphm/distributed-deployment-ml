@@ -1,49 +1,23 @@
-from bentoml import api, env, BentoService, artifacts
-from bentoml.artifact import KerasModelArtifact, PickleArtifact
-from bentoml.handlers import JsonHandler
-from tensorflow.keras.preprocessing import sequence, text
-from data import preprocess
-
-import torch
-import torch.nn as nn
 from bentoml import BentoService, api, artifacts, env
-from bentoml.adapters import JsonInput, JsonOutput
-from bentoml.service.artifacts.common import PickleArtifact
+from bentoml.adapters import JsonInput
+from bentoml.handlers import JsonHandler
+from bentoml.frameworks.keras import KerasModelArtifact
 from bentoml.frameworks.pytorch import PytorchModelArtifact
-from train import vocab, device
+from bentoml.service.artifacts.common import PickleArtifact
+from tensorflow.keras.preprocessing import sequence, text
+import torch
 
-
-@env(auto_pip_dependencies=True, infer_pip_packages=True)
-@artifacts([PytorchModelArtifact("torchmodel"), PickleArtifact("torchtokenizer")])
-class TorchService(BentoService):
-    def model_pred(self, sentence):
-        self.artifacts.model.eval()
-
-        tokens = self.artifacts.torchtokenizer.tokenize(sentence)
-        length = torch.LongTensor([len(tokens)]).to(device)
-        idx = [vocab.stoi[token] for token in tokens]
-        tensor = torch.LongTensor(idx).unsqueeze(-1).to(device)
-
-        prediction = self.artifacts.torchmodel(tensor, length)
-        probabilities = nn.softmax(prediction, dim=-1)
-        return probabilities.squeeze()[-1].item()
-
-    @api(input=JsonInput(), output=JsonOutput())
-    def predict(self, parsed_json):
-        return self.model_pred(parsed_json["text"])
+from data import preprocess
 
 
 @env(infer_pip_packages=True)
-@artifacts([KerasModelArtifact('kerasmodel'), PickleArtifact('kerastokenizer')])
+@artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):
-        if (
-            word in self.artifacts.kerastokenizer
-            and self.artifacts.kerastokenizer[word] <= 5000
-        ):
-            return self.artifacts.kerastokenizer[word]
+        if word in self.artifacts.tokenizer and self.artifacts.tokenizer[word] <= 5000:
+            return self.artifacts.tokenizer[word]
         else:
-            return self.artifacts.kerastokenizer["<OOV>"]
+            return self.artifacts.tokenizer["<OOV>"]
 
     def preprocessing(self, text_str):
         proc = text.text_to_word_sequence(preprocess(text_str))
@@ -56,4 +30,29 @@ class TensorflowService(BentoService):
         raw = self.preprocessing(parsed_json['text'])
         input_data = [raw[: n + 1] for n in range(len(raw))]
         input_data = sequence.pad_sequences(input_data, maxlen=100, padding="post")
-        return self.artifacts.kerasmodel.predict(input_data, verbose=1)
+        return self.artifacts.model.predict(input_data, verbose=1)
+
+
+@env(infer_pip_packages=True)
+@artifacts([PytorchModelArtifact("bert")])
+class TransformersService(BentoService):
+    @api(input=JsonInput(), batch=False)
+    def predict(self, parsed_json):
+        src_text = parsed_json.get("text")
+        model = self.artifacts.bert.get("model")
+        tokenizer = self.artifacts.bert.get("tokenizer")
+        with torch.no_grad():
+            tokens = tokenizer.tokenize(src_text)
+            tokens = ['[CLS]'] + tokens + ['[SEP]']
+            tokens_ids = tokenizer.convert_tokens_to_ids(tokens)
+            seq = torch.tensor(tokens_ids)
+            seq = seq.unsqueeze(0)
+            attn_mask = (seq != 0).long()
+            logit = model(seq, attn_mask)
+            prob = torch.sigmoid(logit.unsqueeze(-1))
+            prob = prob.item()
+            soft_prob = prob > 0.5
+            if soft_prob == 1:
+                return prob
+            else:
+                return 1 - prob

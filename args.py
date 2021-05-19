@@ -1,6 +1,6 @@
 import logging
 
-model_name_or_path = "barissayil/bert-sentiment-analysis-sst"
+model_name = "barissayil/bert-sentiment-analysis-sst"
 
 rank = 0
 

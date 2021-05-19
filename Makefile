@@ -2,24 +2,18 @@
 
 .PHONY: help
 help: ## List of defined target
-	@grep -E '^[a-zA-Z_-]+:.*?##.*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'	
-
-train-torch:
-	python train.py --train
+	@grep -E '^[a-zA-Z_-]+:.*?##.*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 train-tf:
-	python train.py --tf
-
-train-prep: ## prep embedding
 	python train.py
 
-.PHONY: dist-run ## run server with distributed
-dist-run:
-	python -m torch.distributed.launch --nproc_per_node=2 server.py
+pack: pack_torch pack_tf
 
-.PHONY: run ## run our server
-run:
-	python server.py
+pack_torch:
+	python packer_torch.py
+
+pack_tf:
+	python packer_tf.py
 
 .PHONY: guni ## start production
 guni:
