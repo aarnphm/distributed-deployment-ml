@@ -1,27 +1,47 @@
-import time
 import random
+import time
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchtext.legacy import data
-from torchtext.legacy import datasets
+from torchtext.legacy import data, datasets
 
+from data_torch import SEED, Dataset
 from model_torch import TorchNetwork, device
-
-SEED = 1234
 
 torch.manual_seed(SEED)
 torch.backends.cudnn.deterministic = True
 
-TEXT = data.Field(tokenize='spacy',
-                  tokenizer_language='en_core_web_sm',
-                  include_lengths=True)
-LABEL = data.LabelField(dtype=torch.float)
 
-train_data, test_data = datasets.IMDB.splits(TEXT, LABEL, root="dataset")
+BIDIRECTIONAL = True
+MAX_VOCAB_SIZE = 25000
+BATCH_SIZE = 64
+EMBEDDING_DIM = 100
+HIDDEN_DIM = 256
+OUTPUT_DIM = 1
+N_LAYERS = 2
+DROPOUT = 0.5
+N_EPOCHS = 5
 
-train_data, valid_data = train_data.split(random_state=random.seed(SEED))
+imdb = Dataset(MAX_VOCAB_SIZE, BATCH_SIZE, device)
+vocab = imdb.get_vocab()
 
+INPUT_DIM = len(vocab)
+PAD_IDX = imdb.get_pad_idx()
+UNK_IDX = imdb.get_unk_idx()
+
+train_iterator, valid_iterator, test_iterator = imdb.get_iterator()
+
+model = TorchNetwork(
+    INPUT_DIM,
+    EMBEDDING_DIM,
+    HIDDEN_DIM,
+    OUTPUT_DIM,
+    N_LAYERS,
+    BIDIRECTIONAL,
+    DROPOUT,
+    PAD_IDX,
+)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -37,56 +57,6 @@ def binary_accuracy(preds, y):
     correct = (rounded_preds == y).float()  # convert into float for division
     acc = correct.sum() / len(correct)
     return acc
-
-
-MAX_VOCAB_SIZE = 25_000
-BATCH_SIZE = 64
-EMBEDDING_DIM = 100
-HIDDEN_DIM = 256
-OUTPUT_DIM = 1
-N_LAYERS = 2
-BIDIRECTIONAL = True
-DROPOUT = 0.5
-N_EPOCHS = 5
-
-TEXT.build_vocab(train_data,
-                 max_size=MAX_VOCAB_SIZE,
-                 vectors="glove.6B.100d",
-                 unk_init=torch.Tensor.normal_)
-
-LABEL.build_vocab(train_data)
-
-train_iterator, valid_iterator, test_iterator = data.BucketIterator.splits(
-    (train_data, valid_data, test_data),
-    batch_size=BATCH_SIZE,
-    sort_within_batch=True,
-    device=device)
-
-INPUT_DIM = len(TEXT.vocab)
-PAD_IDX = TEXT.vocab.stoi[TEXT.pad_token]
-
-model = TorchNetwork(INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM, OUTPUT_DIM, N_LAYERS, BIDIRECTIONAL, DROPOUT, PAD_IDX)
-
-print(f'The model has {count_parameters(model):,} trainable parameters')
-print(model)
-
-pretrained_embeddings = TEXT.vocab.vectors
-
-model.embedding.weight.data.copy_(pretrained_embeddings)
-
-UNK_IDX = TEXT.vocab.stoi[TEXT.unk_token]
-
-model.embedding.weight.data[UNK_IDX] = torch.zeros(EMBEDDING_DIM)
-model.embedding.weight.data[PAD_IDX] = torch.zeros(EMBEDDING_DIM)
-print("\nModel embedding weight: \n")
-print(model.embedding.weight.data)
-
-optimizer = optim.Adam(model.parameters())
-
-criterion = nn.BCEWithLogitsLoss()
-
-model = model.to(device)
-criterion = criterion.to(device)
 
 
 def train(model, iterator, optimizer, criterion):
@@ -148,6 +118,24 @@ def epoch_time(start_time, end_time):
 
 if __name__ == '__main__':
     print(f"device: {device}")
+
+    print(f'The model has {count_parameters(model):,} trainable parameters')
+    print(model)
+
+    pretrained_embeddings = vocab.vectors
+
+    model.embedding.weight.data.copy_(pretrained_embeddings)
+
+    model.embedding.weight.data[UNK_IDX] = torch.zeros(EMBEDDING_DIM)
+    model.embedding.weight.data[PAD_IDX] = torch.zeros(EMBEDDING_DIM)
+
+    optimizer = optim.Adam(model.parameters())
+
+    criterion = nn.BCEWithLogitsLoss()
+
+    model = model.to(device)
+
+    criterion = criterion.to(device)
 
     print("\nStart training\n")
     best_valid_loss = float('inf')

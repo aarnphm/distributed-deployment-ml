@@ -6,7 +6,7 @@ from tensorflow.keras.preprocessing import sequence, text
 from data_tf import preprocess
 
 
-@env(infer_pip_packages=True)
+@env(infer_pip_packages=True, pip_packages=['tensorflow-gpu==2.4.0'])
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):
@@ -28,5 +28,3 @@ class TensorflowService(BentoService):
         input_data = [raw[: n + 1] for n in range(len(raw))]
         input_data = sequence.pad_sequences(input_data, maxlen=100, padding="post")
         return self.artifacts.model.predict(input_data, verbose=1)
-
-

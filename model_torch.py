@@ -1,23 +1,33 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # PyTorch BiLSTM
 class TorchNetwork(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, bidirectional,
-                 dropout, pad_idx):
-        super(TorchNetwork, self).__init__()
+    def __init__(
+        self,
+        vocab_size,
+        embedding_dim,
+        hidden_dim,
+        output_dim,
+        n_layers,
+        bidirectional,
+        dropout,
+        pad_idx,
+    ):
+        super().__init__()
 
         self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_idx)
 
-        self.lstm = nn.LSTM(embedding_dim,
-                            hidden_dim,
-                            num_layers=n_layers,
-                            bidirectional=bidirectional,
-                            dropout=dropout)
+        self.lstm = nn.LSTM(
+            embedding_dim,
+            hidden_dim,
+            num_layers=n_layers,
+            bidirectional=bidirectional,
+            dropout=dropout,
+        )
 
         self.fc = nn.Linear(hidden_dim * 2, output_dim)
 
@@ -31,7 +41,9 @@ class TorchNetwork(nn.Module):
         # embedded = [batch size, sent len, emb dim]
         # pack sequence
         # lengths need to be on CPU!
-        packed_embedded = nn.utils.rnn.pack_padded_sequence(embedded, text_lengths.to("cpu"), enforce_sorted=False)
+        packed_embedded = nn.utils.rnn.pack_padded_sequence(
+            embedded, text_lengths.to("cpu"), enforce_sorted=False
+        )
 
         # we dont need to use cell
         packed_output, (hidden, _) = self.lstm(packed_embedded)

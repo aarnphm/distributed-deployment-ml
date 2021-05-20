@@ -1,5 +1,5 @@
 bentoml==0.12.1
+tensorflow-gpu==2.4.0
 tensorflow
-scikit-learn==0.24.1
-tensorflow-gpu==2.5.0
 pandas==1.2.2
+scikit-learn==0.24.1
