@@ -1,10 +1,13 @@
-import torch
-from bento_service import PytorchService
-from model import TorchNetwork
 import os
 import subprocess
+
 import spacy
-from train_torch import INPUT_DIM, EMBEDDING_DIM,HIDDEN_DIM, OUTPUT_DIM, N_LAYERS, BIDIRECTIONAL, OUTPUT_DIM, DROPOUT, PAD_IDX
+import torch
+from distutils.dir_util import copy_tree
+
+from bento_service_torch import PytorchService
+from model_torch import TorchNetwork
+from train_torch import INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM, N_LAYERS, BIDIRECTIONAL, OUTPUT_DIM, DROPOUT, PAD_IDX
 
 deploy_dir = "deploy/pytorch_service"
 if not os.path.exists(deploy_dir):
@@ -12,7 +15,7 @@ if not os.path.exists(deploy_dir):
 
 
 tokenizer = spacy.load('en_core_web_sm')
-model = TorchNetwork(INPUT_DIM, EMBEDDING_DIM,HIDDEN_DIM, OUTPUT_DIM, N_LAYERS, BIDIRECTIONAL, DROPOUT, PAD_IDX)
+model = TorchNetwork(INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM, OUTPUT_DIM, N_LAYERS, BIDIRECTIONAL, DROPOUT, PAD_IDX)
 model.load_state_dict(torch.load("model/torchnet.pt"))
 model.eval()
 
@@ -63,4 +66,5 @@ print(
 print("_____")
 print("saved model path: %s" % saved_path)
 
-subprocess.run(["cp", "-rf", saved_path + "/*", deploy_dir], shell=False)
+
+copy_tree(saved_path, deploy_dir)

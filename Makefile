@@ -18,5 +18,11 @@ tf-train:
 tf-pack:
 	python packer_tf.py
 
-tf-d-i:
-	docker run --gpus all -it tensorflow/tensorflow:latest-gpu bash
+tf-d:
+	cd deploy/tensorflow_service && docker build -t bento-tf-gpu:latest .
+
+tf-d-r:
+	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 5000:5000 bento-tf-gpu:latest
+
+#tf-d-i:
+#	docker run --gpus all -it tensorflow/tensorflow:latest-gpu bash

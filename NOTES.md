@@ -2,6 +2,9 @@
 
 ## Tensorflow Serving
 
+## Notes from NVIDIA docker container
+https://gitlab.com/nvidia/container-images/cuda/blob/master/doc/dev.md
+
 https://github.com/tensorflow/cloud
 
 When training with Torch &rarr; uses `torch.device`

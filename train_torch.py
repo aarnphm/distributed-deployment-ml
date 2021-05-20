@@ -13,9 +13,6 @@ SEED = 1234
 torch.manual_seed(SEED)
 torch.backends.cudnn.deterministic = True
 
-print(f"device: {device}")
-
-print("\nLoading vocab and tokenizer\n")
 TEXT = data.Field(tokenize='spacy',
                   tokenizer_language='en_core_web_sm',
                   include_lengths=True)
@@ -150,6 +147,8 @@ def epoch_time(start_time, end_time):
 
 
 if __name__ == '__main__':
+    print(f"device: {device}")
+
     print("\nStart training\n")
     best_valid_loss = float('inf')
 

@@ -1,4 +1,7 @@
+FROM nvidia/cuda:11.1-devel-ubuntu18.04 as nvidia-cuda
 FROM bentoml/model-server:0.12.1-py38
+
+COPY --from=nvidia-cuda
 
 # Configure PIP install arguments, e.g. --index-url, --trusted-url, --extra-index-url
 ARG EXTRA_PIP_INSTALL_ARGS=

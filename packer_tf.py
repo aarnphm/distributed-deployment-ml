@@ -1,11 +1,13 @@
-from bento_service import TensorflowService
-import subprocess
 import os
-
-import tensorflow as tf
-from tensorflow.keras.preprocessing.text import tokenizer_from_json
-from tensorflow.keras.models import model_from_json
 import json
+from distutils.dir_util import copy_tree
+import subprocess
+import tensorflow as tf
+
+from tensorflow.keras.models import model_from_json
+from tensorflow.keras.preprocessing.text import tokenizer_from_json
+
+from bento_service_tf import TensorflowService
 
 gpu = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpu[0], True)
@@ -82,4 +84,4 @@ print(
 print("_____")
 print("saved model path: %s" % saved_path)
 
-subprocess.run(["cp", "-rf", saved_path + "/*", deploy_dir], shell=False)
+copy_tree(saved_path, deploy_dir)
