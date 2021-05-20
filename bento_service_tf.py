@@ -6,7 +6,7 @@ from tensorflow.keras.preprocessing import sequence, text
 from data_tf import preprocess
 
 
-@env(infer_pip_packages=True, pip_packages=['tensorflow-gpu==2.4.0'])
+@env(pip_packages=['tensorflow==2.4.0', 'scikit-learn', 'pandas'])
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):

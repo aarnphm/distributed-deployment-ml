@@ -9,9 +9,12 @@ from train_torch import model
 
 deploy_dir = "deploy/pytorch_service"
 artifacts_dir = os.path.join(deploy_dir, "PytorchService")
+deploy_dataset_dir = os.path.join(artifacts_dir, "dataset", "imdb")
 
 if not os.path.exists(deploy_dir):
     os.makedirs(deploy_dir, exist_ok=True)
+if not os.path.exists(deploy_dataset_dir):
+    os.makedirs(deploy_dataset_dir, exist_ok=True)
 
 tokenizer = spacy.load('en_core_web_sm')
 
@@ -67,3 +70,6 @@ print("saved model path: %s" % saved_path)
 
 print("\nCopy to deploy")
 copy_tree(saved_path, deploy_dir)
+copy_tree("dataset/imdb", deploy_dataset_dir)
+copy_tree(".vector_cache", artifacts_dir+"/.vector_cache")
+print("Finished.")

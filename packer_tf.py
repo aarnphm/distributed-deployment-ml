@@ -1,7 +1,6 @@
 import os
 import json
 from distutils.dir_util import copy_tree
-import subprocess
 import tensorflow as tf
 
 from tensorflow.keras.models import model_from_json
@@ -11,6 +10,8 @@ from bento_service_tf import TensorflowService
 
 gpu = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpu[0], True)
+
+
 deploy_dir = "deploy/tensorflow_service"
 if not os.path.exists(deploy_dir):
     os.makedirs(deploy_dir, exist_ok=True)

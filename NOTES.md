@@ -30,25 +30,47 @@ devices:
 
 <b>Serving with BentoML</b>
 
+after packing, edit Dockerfile as follows for GPU-supports:
+
+```dockerfile
+
+FROM nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04 as nvidia-cuda
+
+...
+COPY --from=nvidia-cuda /usr/local/cuda-11.0 /usr/local/cuda
+COPY --from=nvidia-cuda /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64/
+ENV PATH=/usr/local/cuda/bin:$PATH
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
+
+...
+# this is for pytorch only
+RUN python -m spacy download en_core_web_sm
+
+```
+
 ### PyTorch
 
 _relevant files can be found under `*_torch.py`_
 
-&rarr; uses `torch.device` to manually cast model to use GPU devices
-- `cuda:0`, or `cuda:{gpu_id}` in the context of multiple GPUs
+```python
+import torch
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+model = model.to(device)
+```
 
 ### Tensorflow
 
 _relevant files can be found under `*_tf.py`_
 
 ```python
+import tensorflow as tf
+
 gpu = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpu[0], True)
-```
 
-- within training loops, wrapped around a context:
-
-```python
+# or using `with` statement:
 with tf.device("/GPU:0"):
     ...
+
 ```

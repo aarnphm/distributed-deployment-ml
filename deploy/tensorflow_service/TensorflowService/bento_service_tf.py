@@ -5,8 +5,12 @@ from bentoml.service.artifacts.common import PickleArtifact
 from tensorflow.keras.preprocessing import sequence, text
 from data_tf import preprocess
 
+import tensorflow.compat.v1 as tf
 
-@env(infer_pip_packages=True, pip_packages=['tensorflow-gpu==2.4.0'])
+tf.disable_v2_behavior()
+
+
+@env(pip_packages=['tensorflow-gpu==2.4.0', 'scikit-learn', 'pandas'])
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):
