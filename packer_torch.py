@@ -4,7 +4,7 @@ from model import TorchNetwork
 import os
 import subprocess
 import spacy
-from train_torch import INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, DROPOUT, PAD_IDX
+from train_torch import INPUT_DIM, EMBEDDING_DIM,HIDDEN_DIM, OUTPUT_DIM, N_LAYERS, BIDIRECTIONAL, OUTPUT_DIM, DROPOUT, PAD_IDX
 
 deploy_dir = "deploy/pytorch_service"
 if not os.path.exists(deploy_dir):
@@ -12,14 +12,14 @@ if not os.path.exists(deploy_dir):
 
 
 tokenizer = spacy.load('en_core_web_sm')
-model = TorchNetwork(INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, DROPOUT, PAD_IDX)
+model = TorchNetwork(INPUT_DIM, EMBEDDING_DIM,HIDDEN_DIM, OUTPUT_DIM, N_LAYERS, BIDIRECTIONAL, DROPOUT, PAD_IDX)
 model.load_state_dict(torch.load("model/torchnet.pt"))
 model.eval()
 
 bento_svc = PytorchService()
 artifact = {"model": model, "tokenizer": tokenizer}
 
-bento_svc.pack("cnn", artifact)
+bento_svc.pack("torchmodel", artifact)
 saved_path = bento_svc.save()
 
 print(

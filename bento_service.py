@@ -36,13 +36,13 @@ class TensorflowService(BentoService):
 
 
 @env(infer_pip_packages=True)
-@artifacts([PytorchModelArtifact("cnn")])
+@artifacts([PytorchModelArtifact("torchmodel")])
 class PytorchService(BentoService):
     @api(input=JsonInput())
     def predict(self, parsed_json, min_len=5):
         src_text = parsed_json.get("text")
-        model = self.artifacts.cnn.get("model")
-        nlp = self.artifacts.cnn.get("tokenizer")
+        model = self.artifacts.torchmodel.get("model")
+        nlp = self.artifacts.torchmodel.get("tokenizer")
         model.eval()
         tokenized = [tok.text for tok in nlp.tokenizer(src_text)]
         if len(tokenized) < min_len:
