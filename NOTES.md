@@ -1,17 +1,54 @@
-## NVIDIA Triton Server
+<b>NVIDIA Triton Server</b>
 
-## Tensorflow Serving
+<b>Tensorflow Serving</b>
 
-## Notes from NVIDIA docker container
-https://gitlab.com/nvidia/container-images/cuda/blob/master/doc/dev.md
+<b>TorchServe</b>
 
-https://github.com/tensorflow/cloud
+<b>Notes from NVIDIA docker container</b>
 
-When training with Torch &rarr; uses `torch.device`
+recent updates from systemd rearchitecture broke `nvidia-docker`, refers to [#1447](https://github.com/NVIDIA/nvidia-docker/issues/1447). This problems is confirmed to be in the process of fixing for **future releases**.
 
-when training with Tensorflow &rarr; uses 
+current fixes:
+
+```shell
+# for debian users one can disable cgroup hierarchy by adding to GRUB_CMDLINE_LINUX_DEFAULT="quiet systemd.unified_cgroup_hierarchy=0"
+
+# for arch users change #no-cgroups=true under /etc/nvidia-container-runtime/config.toml
+
+# one can just run the below command 
+docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl ...
+
+# or setup a docker-compose.yml and do
+devices:
+  - /dev/nvidia0:/dev/nvidia0
+  - /dev/nvidiactl:/dev/nvidiactl
+  - /dev/nvidia-modeset:/dev/nvidia-modeset
+  - /dev/nvidia-uvm:/dev/nvidia-uvm
+  - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+```
+
+
+<b>Serving with BentoML</b>
+
+### PyTorch
+
+_relevant files can be found under `*_torch.py`_
+
+&rarr; uses `torch.device` to manually cast model to use GPU devices
+- `cuda:0`, or `cuda:{gpu_id}` in the context of multiple GPUs
+
+### Tensorflow
+
+_relevant files can be found under `*_tf.py`_
 
 ```python
 gpu = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpu[0], True)
+```
+
+- within training loops, wrapped around a context:
+
+```python
+with tf.device("/GPU:0"):
+    ...
 ```

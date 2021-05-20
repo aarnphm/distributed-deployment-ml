@@ -1,17 +1,14 @@
-import random
 import time
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchtext.legacy import data, datasets
 
 from data_torch import SEED, Dataset
-from model_torch import TorchNetwork, device
+from model_torch import BiLSTM, device
 
 torch.manual_seed(SEED)
 torch.backends.cudnn.deterministic = True
-
 
 BIDIRECTIONAL = True
 MAX_VOCAB_SIZE = 25000
@@ -28,11 +25,9 @@ vocab = imdb.get_vocab()
 
 INPUT_DIM = len(vocab)
 PAD_IDX = imdb.get_pad_idx()
-UNK_IDX = imdb.get_unk_idx()
 
-train_iterator, valid_iterator, test_iterator = imdb.get_iterator()
 
-model = TorchNetwork(
+model = BiLSTM(
     INPUT_DIM,
     EMBEDDING_DIM,
     HIDDEN_DIM,
@@ -42,6 +37,9 @@ model = TorchNetwork(
     DROPOUT,
     PAD_IDX,
 )
+
+model = model.to(device)
+
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -122,6 +120,9 @@ if __name__ == '__main__':
     print(f'The model has {count_parameters(model):,} trainable parameters')
     print(model)
 
+    UNK_IDX = imdb.get_unk_idx()
+
+    train_iterator, valid_iterator, test_iterator = imdb.get_iterator()
     pretrained_embeddings = vocab.vectors
 
     model.embedding.weight.data.copy_(pretrained_embeddings)
@@ -132,8 +133,6 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters())
 
     criterion = nn.BCEWithLogitsLoss()
-
-    model = model.to(device)
 
     criterion = criterion.to(device)
 

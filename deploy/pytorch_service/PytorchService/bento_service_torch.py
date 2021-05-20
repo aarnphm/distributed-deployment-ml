@@ -1,27 +1,26 @@
 from bentoml import BentoService, api, artifacts, env
-from bentoml.adapters import JsonInput
+from bentoml.adapters import JsonInput, JsonOutput
 from bentoml.frameworks.pytorch import PytorchModelArtifact
 from bentoml.service.artifacts.pickle import PickleArtifact
 import torch
-import torch.nn.functional as F
 
-from train_torch import TEXT
+from train_torch import vocab
 from model_torch import device
 
 
-@env(infer_pip_packages=True)
+@env(infer_pip_packages=True, pip_packages=['spacy', 'torchtext'])
 @artifacts([PytorchModelArtifact("model"), PickleArtifact("tokenizer")])
 class PytorchService(BentoService):
-    @api(input=JsonInput())
-    def predict(self, parsed_json):
-        sentence = parsed_json.get("text")
-        model = self.artifacts.model
-        nlp = self.artifacts.tokenizer
-        model.eval()
-        tokenized = [tok.text for tok in nlp.tokenizer(sentence)]
-        indexed = [TEXT.vocab.stoi[t] for t in tokenized]
-        length_tensor = torch.LongTensor([len(indexed)]).to(device)
+    def predict_sentiment(self, sentence):
+        self.artifacts.model.eval()
+        tokenized = [tok.text for tok in self.artifacts.tokenizer.tokenizer(sentence)]
+        indexed = [vocab.stoi[t] for t in tokenized]
+        length = torch.LongTensor([len(indexed)])
         tensor = torch.LongTensor(indexed).to(device)
         tensor = tensor.unsqueeze(1)
-        prediction = F.sigmoid(model(tensor, length_tensor))
+        prediction = torch.sigmoid(self.artifacts.model(tensor, length))
         return prediction.item()
+
+    @api(input=JsonInput(), output=JsonOutput())
+    def predict(self, parsed_json):
+        return self.predict_sentiment(parsed_json['text'])

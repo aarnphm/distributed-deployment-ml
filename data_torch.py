@@ -11,12 +11,15 @@ class Dataset:
         self.batch_size = BATCH_SIZE
         self.max_vocab_size = MAX_VOCAB_SIZE
         self.device = device
+        self._init_text_label()
 
+    def _init_text_label(self):
         TEXT = data.Field(
             tokenize='spacy', tokenizer_language='en_core_web_sm', include_lengths=True
         )
         LABEL = data.LabelField(dtype=torch.float)
 
+        print("\nLoading IMDB train & test dataset")
         self.train_data, self.test_data = datasets.IMDB.splits(
             TEXT, LABEL, root="dataset"
         )
@@ -34,8 +37,8 @@ class Dataset:
 
         LABEL.build_vocab(self.train_data)
 
-        self.vocab = TEXT.vocab
         self.TEXT, self.LABEL = TEXT, LABEL
+        self.vocab = self.TEXT.vocab
 
     def get_pad_idx(self):
         return self.vocab.stoi[self.TEXT.pad_token]

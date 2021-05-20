@@ -1,9 +1,7 @@
 import setuptools
-
 try:
     # for pip >= 10
     from pip._internal.req import parse_requirements
-
     try:
         # for pip >= 20.0
         from pip._internal.network.session import PipSession
@@ -30,9 +28,9 @@ except Exception:
 
 setuptools.setup(
     name='PytorchService',
-    version='20210520220744_448DD1',
+    version='20210521014633_FC84DC',
     description="BentoML generated model module",
-    long_description="""# Generated BentoService bundle - PytorchService:20210520220744_448DD1
+    long_description="""# Generated BentoService bundle - PytorchService:20210521014633_FC84DC
 
 This is a ML Service bundle created with BentoML, it is not recommended to edit
 code or files contained in this directory. Instead, edit the code that uses BentoML
@@ -43,6 +41,12 @@ to create this bundle, and save a new BentoService bundle.
     packages=setuptools.find_packages(),
     install_requires=install_reqs,
     include_package_data=True,
-    package_data={'PytorchService': ['bentoml.yml', 'artifacts/*']},
-    entry_points={'console_scripts': ['PytorchService=PytorchService:cli',],},
+    package_data={
+        'PytorchService': ['bentoml.yml', 'artifacts/*']
+    },
+    entry_points={
+        'console_scripts': [
+            'PytorchService=PytorchService:cli',
+        ],
+    }
 )

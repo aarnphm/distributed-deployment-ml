@@ -1,8 +1,14 @@
-.DEFAULT_GOAL: prep
+.DEFAULT_GOAL=pipe
 
 .PHONY: help
 help: ## List of defined target
 	@grep -E '^[a-zA-Z_-]+:.*?##.*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+clean:
+	rm -rf deploy/*
+
+.PHONY: pipe
+pipe: tf-pipe torch-pipe ## init both pipeline
 
 .PHONY: torch-pipe
 torch-pipe: torch-train torch-pack torch-d ## our torch pipeline with bentoml
@@ -11,6 +17,7 @@ torch-train:
 	python train_torch.py
 
 torch-pack:
+	# RUN python -m spacy download en_core_web_sm for Docker
 	python packer_torch.py
 
 torch-d:

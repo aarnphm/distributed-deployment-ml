@@ -1,9 +1,9 @@
 version: 0.12.1
 kind: BentoService
 metadata:
-  created_at: 2021-05-20 15:47:44.121395
+  created_at: 2021-05-20 17:02:17.573108
   service_name: TensorflowService
-  service_version: '20210520224742_038837'
+  service_version: 20210521000215_42FB64
   module_name: bento_service_tf
   module_file: bento_service_tf.py
 env:

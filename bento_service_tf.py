@@ -24,7 +24,6 @@ class TensorflowService(BentoService):
     def predict(self, parsed_json):
         # single pred
         raw = self.preprocessing(parsed_json['text'])
-        print(raw)
         input_data = [raw[: n + 1] for n in range(len(raw))]
         input_data = sequence.pad_sequences(input_data, maxlen=100, padding="post")
         return self.artifacts.model.predict(input_data, verbose=1)

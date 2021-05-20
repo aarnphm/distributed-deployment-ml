@@ -5,7 +5,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # PyTorch BiLSTM
-class TorchNetwork(nn.Module):
+class BiLSTM(nn.Module):
     def __init__(
         self,
         vocab_size,

@@ -43,6 +43,7 @@ bento_svc.pack('tokenizer', tokenizer)
 
 saved_path = bento_svc.save()
 
+print("\nExample run\n")
 print(
     bento_svc.predict(
         {
@@ -50,11 +51,10 @@ print(
             "old-time-BBC fashion and gives a comforting, and sometimes discomforting, sense of realism to "
             "the entire piece. <br /><br />The actors are extremely well chosen- Michael Sheen not only "
             "has got all the polari but he has all the voices down pat too! You can truly see the "
-            "seamless editing guided by the references "
-            "to Williams' diary entries, not only is it well worth the watching but it is a terrifically "
-            "written and performed piece. A masterful production about one of the great master's of comedy "
-            "and his life. <br /><br />The realism really comes home with the little things: the fantasy of "
-            "the guard which, rather than use the traditional 'dream' techniques remains solid then "
+            "seamless editing guided by the references to Williams' diary entries, not only is it well worth the "
+            "watching but it is a terrifically written and performed piece. A masterful production about one of the "
+            "great master's of comedy and his life. <br /><br />The realism really comes home with the little things: "
+            "the fantasy of the guard which, rather than use the traditional 'dream' techniques remains solid then "
             "disappears. It plays on our knowledge and our senses, particularly with the scenes concerning "
             "Orton and Halliwell and the sets (particularly of their flat with Halliwell's murals decorating "
             "every surface) are terribly well done."

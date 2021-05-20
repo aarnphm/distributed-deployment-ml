@@ -5,7 +5,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import RMSprop
 
 from data_tf import Dataset
-from model_tf import TFNetwork
+from model_tf import BiLSTM
 
 SEED = 1234
 
@@ -17,7 +17,7 @@ tf.config.experimental.set_memory_growth(gpu[0], True)
 VOCAB_SIZE = 5000
 MAX_SEQ_LEN = 100
 
-model = TFNetwork(MAX_SEQ_LEN, VOCAB_SIZE)
+model = BiLSTM(MAX_SEQ_LEN, VOCAB_SIZE)
 model.summary()
 model.compile(loss='binary_crossentropy', optimizer=RMSprop(), metrics=['accuracy'])
 
