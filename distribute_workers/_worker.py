@@ -106,7 +106,7 @@ class Worker:
             if self._destroy_event and self._destroy_event.is_set():
                 break
             if not handler:
-                # sleep if not data.py is handled
+                # sleep if not data_tf.py is handled
                 time.sleep(SLEEP)
         logger.info(f"[gpu worker {self._pid}] {self} shutdown")
 

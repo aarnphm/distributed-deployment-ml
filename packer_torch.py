@@ -1,15 +1,25 @@
-from bento_service import TransformersService
+import torch
+from bento_service import PytorchService
+from model import TorchNetwork
+import os
+import subprocess
+import spacy
+from train_torch import INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, DROPOUT, PAD_IDX
 
-from model import TransformersBert
-from transformers import AutoTokenizer
-from args import model_name
+deploy_dir = "deploy/pytorch_service"
+if not os.path.exists(deploy_dir):
+    os.makedirs(deploy_dir, exist_ok=True)
 
-model = TransformersBert.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+tokenizer = spacy.load('en_core_web_sm')
+model = TorchNetwork(INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, DROPOUT, PAD_IDX)
+model.load_state_dict(torch.load("model/torchnet.pt"))
+model.eval()
+
+bento_svc = PytorchService()
 artifact = {"model": model, "tokenizer": tokenizer}
 
-bento_svc = TransformersService()
-bento_svc.pack("bert", artifact)
+bento_svc.pack("cnn", artifact)
 saved_path = bento_svc.save()
 
 print(
@@ -52,3 +62,5 @@ print(
 
 print("_____")
 print("saved model path: %s" % saved_path)
+
+subprocess.run(["cp", "-rf", saved_path + "/*", deploy_dir], shell=False)

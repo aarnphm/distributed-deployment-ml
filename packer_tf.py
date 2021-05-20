@@ -1,30 +1,39 @@
 from bento_service import TensorflowService
+import subprocess
+import os
 
+import tensorflow as tf
 from tensorflow.keras.preprocessing.text import tokenizer_from_json
 from tensorflow.keras.models import model_from_json
 import json
 
+gpu = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpu[0], True)
+deploy_dir = "deploy/tensorflow_service"
+if not os.path.exists(deploy_dir):
+    os.makedirs(deploy_dir, exist_ok=True)
 
-def loadTokenizer():
-    with open('model/tftokenizer.json', 'r') as f:
+
+def load_tokenizer():
+    with open('model/tokenizer.json', 'r') as f:
         data = json.load(f)
         tokenizer = tokenizer_from_json(data)
         j = tokenizer.get_config()['word_index']
         return json.loads(j)
 
 
-def loadModel():
+def load_model():
     # load json and create model
-    json_file = open('model/tfmodel.json', 'r')
+    json_file = open('model/model.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json)
-    model.load_weights("model/tfweights.h5")
+    model.load_weights("model/weights.h5")
     return model
 
 
-model = loadModel()
-tokenizer = loadTokenizer()
+model = load_model()
+tokenizer = load_tokenizer()
 
 bento_svc = TensorflowService()
 bento_svc.pack('model', model)
@@ -38,9 +47,9 @@ print(
             'text': "A wonderful little production. <br /><br />The filming technique is very unassuming- very "
             "old-time-BBC fashion and gives a comforting, and sometimes discomforting, sense of realism to "
             "the entire piece. <br /><br />The actors are extremely well chosen- Michael Sheen not only "
-            "has got all the polari"
-            "but he has all the voices down pat too! You can truly see the seamless editing guided by the references "
-            "to Williams' diary entries, not only is it well worth the watching but it is a terrificly "
+            "has got all the polari but he has all the voices down pat too! You can truly see the "
+            "seamless editing guided by the references "
+            "to Williams' diary entries, not only is it well worth the watching but it is a terrifically "
             "written and performed piece. A masterful production about one of the great master's of comedy "
             "and his life. <br /><br />The realism really comes home with the little things: the fantasy of "
             "the guard which, rather than use the traditional 'dream' techniques remains solid then "
@@ -72,3 +81,5 @@ print(
 
 print("_____")
 print("saved model path: %s" % saved_path)
+
+subprocess.run(["cp", "-rf", saved_path + "/*", deploy_dir], shell=False)
