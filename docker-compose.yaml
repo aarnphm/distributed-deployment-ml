@@ -1,12 +1,12 @@
 version: "3.7"
 services:
-  bento-tf:
+  bento-tensorflow:
     image: bento-tf-gpu:latest
     build:
-      context: deploy/tensorflow_service
+      context: deploy/tf_svc
       dockerfile: Dockerfile
     ports:
-      - "60062:5000"
+      - "6000:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl
@@ -19,7 +19,7 @@ services:
       context: deploy/pytorch_service
       dockerfile: Dockerfile
     ports:
-      - "60061:5000"
+      - "7000:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl

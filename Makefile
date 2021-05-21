@@ -1,4 +1,7 @@
 .DEFAULT_GOAL=pipe
+TENSORFLOW_DIR=tf
+PYTORCH_DIR=torch
+ONNX_DIR=onnx
 
 .PHONY: help
 help: ## List of defined target
@@ -7,40 +10,42 @@ help: ## List of defined target
 clean:
 	rm -rf deploy/*
 
-.PHONY: pipe
-pipe: tf-pipe torch-pipe ## init both pipeline
-
 compose: ## run all services together
 	docker-compose up
 
-.PHONY: torch-pipe
-torch-pipe: torch-train torch-pack torch-d ## our torch pipeline with bentoml
+.PHONY: torch-e2e
+torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
 
 torch-train:
-	python train_torch.py
+	cd $(PYTORCH_DIR) && python train.py
+
+.PHONY: torch-pipe
+torch-pipe: torch-pack torch-d ## our pytorch deployment pipeline with bentoml
 
 torch-pack:
-	# RUN python -m spacy download en_core_web_sm for Docker
-	python packer_torch.py
+	cd $(PYTORCH_DIR) && python bento_packer.py
 
 torch-d:
-	cd deploy/pytorch_service && docker build -t bento-torch-gpu:latest .
+	cd deploy/torch_svc && docker build -t bento-torch-gpu:latest .
 
 torch-d-r:
 	# ldconfig -p | grep nvidia
-	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 60061:5000 bento-torch-gpu:latest
+	docker run --gpus all -p 7000:5000 bento-torch-gpu:latest
 
-.PHONY: tf-pipe
-tf-pipe: tf-train tf-pack tf-d ## our tensorflow pipeline with bentoml
+.PHONY: tf-e2e
+tf-e2e: tf-train tf-pipe tf-d-r  ## e2e pipeline from training to production tf on BentoML
 
 tf-train:
-	python train_tf.py
+	cd $(TENSORFLOW_DIR) && python train.py
+
+.PHONY: tf-pipe
+tf-pipe: tf-pack tf-d ## our tensorflow deployment pipeline with bentoml
 
 tf-pack:
-	python packer_tf.py
+	cd $(TENSORFLOW_DIR) && python bento_packer.py
 
 tf-d:
-	cd deploy/tensorflow_service && docker build -t bento-tf-gpu:latest .
+	cd deploy/tf_svc && docker build -t bento-tf-gpu:latest .
 
 tf-d-r:
-	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 60062:5000 bento-tf-gpu:latest
+	docker run --gpus all-p 6000:5000 bento-tf-gpu:latest

@@ -1,7 +1,10 @@
-<h2 align="center">distributed-deployment-ml</h2>
-<br>
+<l align="center">
+    <h2>distributed-deployment-ml</h2>
 <i>Case study integrating GPU support for BentoML</i>
 
-refers to [PROPOSAL.md](./PROPOSAL.md) for a automatic distribution proposal.
+</l>
+<hr>
 
-refers to [NOTES.md](./NOTES.md) for notes of current progress.
+[PROPOSAL.md](./PROPOSAL.md) for a automatic distribution proposal.
+
+[NOTES.md](./NOTES.md) for notes of current progress.

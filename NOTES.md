@@ -1,14 +1,14 @@
-<b>NVIDIA Triton Server</b>
+## <b>NVIDIA Triton Server</b>
 
-<b>Tensorflow Serving</b>
+## <b>Tensorflow Serving</b>
 
-<b>TorchServe</b>
+## <b>TorchServe</b>
 
-<b>Notes from NVIDIA docker container</b>
+## <b>Notes from NVIDIA docker container</b>
 
-recent updates from systemd rearchitecture broke `nvidia-docker`, refers to [#1447](https://github.com/NVIDIA/nvidia-docker/issues/1447). This problems is confirmed to be in the process of fixing for **future releases**.
+recent updates from systemd rearchitecture broke `nvidia-docker`, refers to [#1447](https://github.com/NVIDIA/nvidia-docker/issues/1447). This issue is confirmed to be in the [patched](https://github.com/NVIDIA/nvidia-docker/issues/1447#issuecomment-760189260) for **future releases**.
 
-current fixes:
+current workaround:
 
 ```shell
 # for debian users one can disable cgroup hierarchy by adding to GRUB_CMDLINE_LINUX_DEFAULT="quiet systemd.unified_cgroup_hierarchy=0"
@@ -28,27 +28,26 @@ devices:
 ```
 
 
-<b>Serving with BentoML</b>
+## <b>Serving with BentoML</b>
+
+#### usage of `@env(docker_base_image="nvidia/cuda")`
+
+- dependent on the image having `python` built in
+
 
 after packing, edit Dockerfile as follows for GPU-supports:
 
 ```dockerfile
-
 FROM nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04 as nvidia-cuda
-
 ...
 COPY --from=nvidia-cuda /usr/local/cuda-11.0 /usr/local/cuda
 COPY --from=nvidia-cuda /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64/
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
-
 ...
 # this is for pytorch only
 RUN python -m spacy download en_core_web_sm
-
 ```
-
-refers to [Dockerfile.tensorflow](utils/Dockerfile.tensorflow) && [Dockerfile.pytorch](utils/Dockerfile.pytorch)
 
 ### PyTorch
 

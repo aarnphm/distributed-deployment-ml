@@ -14,7 +14,7 @@ _assumption: end user should train their model with CUDA-enabled in order to ser
 
 <img src="./utils/worker-proposal.svg" width="100%" height="200" alt="worker-proposal">
 
-Dispatcher acts as a middleware to dynamically allocating # of GPUs for certain model. This will help users to statically allocate sets of GPUs for a model
+Dispatcher acts as a middleware to dynamically allocating # of GPUs for certain model. This will help users to statically allocate sets of GPUs for a model, refers to [workers](./utils/workers).
 
 - Queue requests can be sampled into mini-batches and forward to our GPU workers.
 - we use `spawn` subprocess to run GPU workers. Dispatcher has setup two internal queues to handle request and response
@@ -98,4 +98,3 @@ def distributed():
 if __name__ == '__main__':
     WSGIServer(("0.0.0.0", 5000), app).serve_forever()
 ```
-
