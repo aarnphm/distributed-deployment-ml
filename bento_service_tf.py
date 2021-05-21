@@ -3,6 +3,7 @@ from bentoml.adapters import JsonInput
 from bentoml.frameworks.keras import KerasModelArtifact
 from bentoml.service.artifacts.common import PickleArtifact
 from tensorflow.keras.preprocessing import sequence, text
+from tensorflow import config
 from data_tf import preprocess
 
 
@@ -22,6 +23,8 @@ class TensorflowService(BentoService):
 
     @api(input=JsonInput())
     def predict(self, parsed_json):
+        # check if our service is running on GPU
+        # config.list_physical_devices("GPU")
         # single pred
         raw = self.preprocessing(parsed_json['text'])
         input_data = [raw[: n + 1] for n in range(len(raw))]

@@ -38,6 +38,7 @@ model = BiLSTM(
     PAD_IDX,
 )
 
+print("hello world")
 model = model.to(device)
 
 
@@ -115,7 +116,6 @@ def epoch_time(start_time, end_time):
 
 
 if __name__ == '__main__':
-    print(f"device: {device}")
 
     print(f'The model has {count_parameters(model):,} trainable parameters')
     print(model)

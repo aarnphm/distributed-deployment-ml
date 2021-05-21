@@ -5,7 +5,7 @@ import torch
 from distutils.dir_util import copy_tree
 
 from bento_service_torch import PytorchService
-from train_torch import model
+from train_torch import get_model
 
 deploy_dir = "deploy/pytorch_service"
 artifacts_dir = os.path.join(deploy_dir, "PytorchService")
@@ -18,6 +18,7 @@ if not os.path.exists(deploy_dataset_dir):
 
 tokenizer = spacy.load('en_core_web_sm')
 
+model = get_model()
 model.load_state_dict(torch.load("model/torchnet.pt"))
 model.eval()
 

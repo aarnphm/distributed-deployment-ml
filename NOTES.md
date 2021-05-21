@@ -48,6 +48,8 @@ RUN python -m spacy download en_core_web_sm
 
 ```
 
+refers to [Dockerfile.tensorflow](utils/Dockerfile.tensorflow) && [Dockerfile.pytorch](utils/Dockerfile.pytorch)
+
 ### PyTorch
 
 _relevant files can be found under `*_torch.py`_

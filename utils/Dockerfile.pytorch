@@ -42,6 +42,7 @@ RUN ./bentoml-init.sh install_pip_packages
 COPY --chown=bentoml:bentoml docker-entrypoint.sh bundled_pip_dependencie[s]  ./bundled_pip_dependencies/
 RUN rm ./bundled_pip_dependencies/docker-entrypoint.sh && ./bentoml-init.sh install_bundled_pip_packages
 
+RUN python -m spacy download en_core_web_sm
 # copy over model files
 COPY --chown=bentoml:bentoml . ./
 

@@ -12,6 +12,7 @@ from model_torch import device
 @artifacts([PytorchModelArtifact("model"), PickleArtifact("tokenizer")])
 class PytorchService(BentoService):
     def predict_sentiment(self, sentence):
+        self.artifacts.model.to(device)
         self.artifacts.model.eval()
         tokenized = [tok.text for tok in self.artifacts.tokenizer.tokenizer(sentence)]
         indexed = [vocab.stoi[t] for t in tokenized]

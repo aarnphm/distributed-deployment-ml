@@ -1,8 +1,7 @@
-# distributed-deployment-ml
-<i>WIP GPU supports for BentoML</i>
-
-## Notes
+<h2 align="center">distributed-deployment-ml</h2>
+<br>
+<i>Case study integrating GPU support for BentoML</i>
 
 refers to [PROPOSAL.md](./PROPOSAL.md) for a automatic distribution proposal.
 
-- BentoML service packer can be found under [bento_service.py](packer_tf.py)
+refers to [NOTES.md](./NOTES.md) for notes of current progress.

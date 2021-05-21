@@ -10,6 +10,9 @@ clean:
 .PHONY: pipe
 pipe: tf-pipe torch-pipe ## init both pipeline
 
+compose: ## run all services together
+	docker-compose up
+
 .PHONY: torch-pipe
 torch-pipe: torch-train torch-pack torch-d ## our torch pipeline with bentoml
 
@@ -24,7 +27,8 @@ torch-d:
 	cd deploy/pytorch_service && docker build -t bento-torch-gpu:latest .
 
 torch-d-r:
-	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 5000:5000 bento-torch-gpu:latest
+	# ldconfig -p | grep nvidia
+	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 60061:5000 bento-torch-gpu:latest
 
 .PHONY: tf-pipe
 tf-pipe: tf-train tf-pack tf-d ## our tensorflow pipeline with bentoml
@@ -39,4 +43,4 @@ tf-d:
 	cd deploy/tensorflow_service && docker build -t bento-tf-gpu:latest .
 
 tf-d-r:
-	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 5000:5000 bento-tf-gpu:latest
+	docker run --gpus all --device /dev/nvidia0 --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools --device /dev/nvidia-modeset --device /dev/nvidiactl -p 60062:5000 bento-tf-gpu:latest

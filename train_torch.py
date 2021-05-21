@@ -20,25 +20,22 @@ N_LAYERS = 2
 DROPOUT = 0.5
 N_EPOCHS = 5
 
-imdb = Dataset(MAX_VOCAB_SIZE, BATCH_SIZE, device)
-vocab = imdb.get_vocab()
+def get_model():
 
-INPUT_DIM = len(vocab)
-PAD_IDX = imdb.get_pad_idx()
+    model = BiLSTM(
+        INPUT_DIM,
+        EMBEDDING_DIM,
+        HIDDEN_DIM,
+        OUTPUT_DIM,
+        N_LAYERS,
+        BIDIRECTIONAL,
+        DROPOUT,
+        PAD_IDX,
+    )
 
+    model = model.to(device)
+    return model
 
-model = BiLSTM(
-    INPUT_DIM,
-    EMBEDDING_DIM,
-    HIDDEN_DIM,
-    OUTPUT_DIM,
-    N_LAYERS,
-    BIDIRECTIONAL,
-    DROPOUT,
-    PAD_IDX,
-)
-
-model = model.to(device)
 
 
 def count_parameters(model):
@@ -115,8 +112,40 @@ def epoch_time(start_time, end_time):
 
 
 if __name__ == '__main__':
-    print(f"device: {device}")
 
+    torch.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+
+    BIDIRECTIONAL = True
+    MAX_VOCAB_SIZE = 25000
+    BATCH_SIZE = 64
+    EMBEDDING_DIM = 100
+    HIDDEN_DIM = 256
+    OUTPUT_DIM = 1
+    N_LAYERS = 2
+    DROPOUT = 0.5
+    N_EPOCHS = 5
+
+    imdb = Dataset(MAX_VOCAB_SIZE, BATCH_SIZE, device)
+    vocab = imdb.get_vocab()
+
+    INPUT_DIM = len(vocab)
+    PAD_IDX = imdb.get_pad_idx()
+
+
+    model = BiLSTM(
+        INPUT_DIM,
+        EMBEDDING_DIM,
+        HIDDEN_DIM,
+        OUTPUT_DIM,
+        N_LAYERS,
+        BIDIRECTIONAL,
+        DROPOUT,
+        PAD_IDX,
+    )
+
+    print("hello world")
+    model = model.to(device)
     print(f'The model has {count_parameters(model):,} trainable parameters')
     print(model)
 

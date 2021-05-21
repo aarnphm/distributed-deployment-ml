@@ -1,6 +1,8 @@
+import os
+
 import torch
 import random
-from torchtext.legacy import datasets
+from torchtext.legacy.datasets import IMDB
 from torchtext.legacy import data
 
 SEED = 1234
@@ -14,19 +16,19 @@ class Dataset:
         self._init_text_label()
 
     def _init_text_label(self):
+        print("\nLoading text and labels")
         TEXT = data.Field(
             tokenize='spacy', tokenizer_language='en_core_web_sm', include_lengths=True
         )
         LABEL = data.LabelField(dtype=torch.float)
 
-        print("\nLoading IMDB train & test dataset")
-        self.train_data, self.test_data = datasets.IMDB.splits(
-            TEXT, LABEL, root="dataset"
-        )
+        if os.environ.get('IS_IN_DOCKER'):
+            root_dir = "$HOME/bundle/PytorchService/dataset"
+        else:
+            root_dir = "dataset"
+        train_data, self.test_data = IMDB.splits(TEXT, LABEL, root=root_dir)
 
-        self.train_data, self.valid_data = self.train_data.split(
-            random_state=random.seed(SEED)
-        )
+        self.train_data, self.valid_data = train_data.split(random_state=random.seed(SEED))
 
         TEXT.build_vocab(
             self.train_data,
