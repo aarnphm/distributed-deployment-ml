@@ -5,16 +5,17 @@ import torch.nn as nn
 class RNN(nn.Module):
     def __init__(
             self,
-            vocab_size,
+            input_dim,
             embedding_dim,
             hidden_dim,
             output_dim,
             n_layers,
             dropout,
+            pad_idx,
     ):
         super().__init__()
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.embedding = nn.Embedding(input_dim, embedding_dim, padding_idx=pad_idx)
 
         # bidirectional is set to True by default
         self.lstm = nn.LSTM(
@@ -29,11 +30,17 @@ class RNN(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, text):
-        embedded = self.embedding(text)
+    def forward(self, text, length):
+        # text = [seq_len, batch]
+        # length = [batch]
+        embedded = self.dropout(self.embedding(text))
 
-        # [seq_len, batch, embedded]
-        output, (hidden, cell) = self.lstm(embedded)
+        # embedded = [seq_len, batch, emb_dim]
+
+        packed_embedded = nn.utils.rnn.pack_padded_sequence(embedded, length, enforce_sorted=False)
+
+        packed_output, (hidden, cell) = self.lstm(packed_embedded)
+        output, _ = nn.utils.rnn.pad_packed_sequence(packed_output)
 
         # output = [sent len, batch size, hid dim * num directions]
         # output over padding tokens are zero tensors
@@ -48,4 +55,4 @@ class RNN(nn.Module):
 
         # hidden = [batch size, hid dim * num directions]
 
-        return self.fc(hidden.squeeze(0))
+        return self.fc(hidden)

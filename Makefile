@@ -13,6 +13,9 @@ clean:
 compose: ## run all services together
 	docker-compose up
 
+.PHONY: pipe
+pipe: torch-pipe tf-pipe ## run both tensorflow and torch pipe
+
 .PHONY: torch-e2e
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
 

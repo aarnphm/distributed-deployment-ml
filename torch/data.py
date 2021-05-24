@@ -1,55 +1,83 @@
-import os
 from collections import Counter
 
 import torch
-import random
-
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import random_split, DataLoader
-from torchtext.datasets import IMDB
+from torch.utils.data import DataLoader
 from torchtext.data.utils import get_tokenizer
+from torchtext.experimental.datasets import IMDB
+from torchtext.experimental.datasets.text_classification import TextClassificationDataset
+from torchtext.experimental.functional import sequential_transforms, vocab_func, totensor
 from torchtext.vocab import Vocab
 
-SEED = 1234
+from config import MAX_LENGTH, MAX_VOCAB_SIZE, PAD_TOKEN, BATCH_SIZE
+
+
+def build_vocab(raw_data, tokenizer, **vocab_kwargs):
+    token_freq = Counter()
+    for label, text in raw_data:
+        tokens = tokenizer.tokenize(text)
+        token_freq.update(tokens)
+    return Vocab(token_freq, **vocab_kwargs)
+
+
+def process_raw_data(raw_data, tokenizer, vocab):
+    raw = [(label, text) for label, text in raw_data]
+    text_transform = sequential_transforms(tokenizer.tokenize, vocab_func(vocab), totensor(dtype=torch.long))
+    label_transform = sequential_transforms(lambda x: 1 if x == "pos" else 0, totensor(dtype=torch.long))
+    transforms = (label_transform, text_transform)
+
+    dataset = TextClassificationDataset(raw, vocab, transforms)
+    return dataset
+
+
+class Tokenizer:
+    def __init__(self, tokenizer_fn='spacy', language='en', lower=True, max_length=None):
+        self.tokenize_fn = get_tokenizer(tokenizer_fn, language)
+        self.lower = lower
+        self.max_length = max_length
+
+    def tokenize(self, s):
+        tokens = self.tokenize_fn(s)
+        if self.lower:
+            tokens = [token.lower() for token in tokens]
+        if self.max_length is not None:
+            tokens = tokens[:self.max_length]
+        return tokens
+
+
+class Collator:
+    def __init__(self, pad_idx):
+        self.pad_idx = pad_idx
+
+    def collate(self, batch):
+        labels, text = zip(*batch)
+        labels = torch.LongTensor(labels)
+        text_len = torch.LongTensor([len(x) for x in text])
+        text = pad_sequence(text, padding_value=self.pad_idx)
+        return labels, text, text_len
 
 
 class Dataset:
-    def __init__(self, batch_size):
-        self.BATCH_SIZE = batch_size
-        self.tokenizer = get_tokenizer("spacy", "en_core_web_sm")
-        self.train_data, self.test_data = IMDB(root="../dataset")
-        self.train_data, self.valid_data = random_split(self.train_data, [20000, 5000])
-        self.vocab = self._init_vocab()
-        self.text_transform = lambda x: [self.vocab['<BOS>']] + [self.vocab[token] for token in self.tokenizer(x)] + [
-            self.vocab['<EOS>']]
-        self.label_transform = lambda x: 1 if x == 'pos' else 0
-
-    def get_vocab(self):
-        return self.vocab
+    def __init__(self):
+        raw_train, raw_test = IMDB(root="../dataset", split=("train", "test"))
+        raw_train, raw_test = list(raw_train), list(raw_test)
+        self.tokenizer = Tokenizer(max_length=MAX_LENGTH)
+        self.vocab = build_vocab(raw_train, tokenizer=self.tokenizer, max_size=MAX_VOCAB_SIZE)
+        self.train_data = process_raw_data(raw_train, self.tokenizer, self.vocab)
+        self.test_data = process_raw_data(raw_test, self.tokenizer, self.vocab)
+        pad_idx = self.vocab[PAD_TOKEN]
+        self.collator = Collator(pad_idx=pad_idx)
 
     def get_tokenizer(self):
         return self.tokenizer
 
-    def _init_vocab(self):
-        counter = Counter()
-        for label, text in self.train_data:
-            counter.update(self.tokenizer(text))
-        return Vocab(counter, min_freq=10, specials=('<unk>', '<BOS>', '<EOS>', '<PAD>'))
+    def get_pad_idx(self):
+        return self.vocab[PAD_TOKEN]
 
-    @staticmethod
-    def collate_batch(self, batch):
-        label_list, text_list = [], []
-        for (_label, _text) in batch:
-            label_list.append(self.label_transform(_label))
-            processed_text = torch.tensor(self.text_transform(_text))
-            text_list.append(processed_text)
-        return torch.tensor(label_list), pad_sequence(text_list, padding_value=3.0)
+    def get_vocab(self):
+        return self.vocab
 
     def get_iterator(self):
-        train_iter = DataLoader(list(self.train_data), batch_size=self.BATCH_SIZE, shuffle=True,
-                                collate_fn=self.collate_batch)
-        valid_iter = DataLoader(list(self.valid_data), batch_size=self.BATCH_SIZE, shuffle=True,
-                                collate_fn=self.collate_batch)
-        test_iter = DataLoader(list(self.test_data), batch_size=self.BATCH_SIZE, shuffle=True,
-                               collate_fn=self.collate_batch)
-        return train_iter, valid_iter, test_iter
+        train_iter = DataLoader(self.train_data, BATCH_SIZE, shuffle=True, collate_fn=self.collator.collate)
+        test_iter = DataLoader(self.test_data, BATCH_SIZE, shuffle=False, collate_fn=self.collator.collate)
+        return train_iter, test_iter
