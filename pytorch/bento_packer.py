@@ -19,8 +19,7 @@ if not os.path.exists(deploy_dir):
 
 tokenizer, vocab = get_tokenizer_vocab()
 vocab_size, emsize, num_class = get_model_params(vocab)
-model = TextClassificationModel(vocab_size, emsize, num_class)
-model.to("cpu")
+model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
 model.load_state_dict(torch.load("../model/pytorch/pytorch_model.pt"))
 model.eval()
 
@@ -33,6 +32,7 @@ saved_path = bento_svc.save()
 
 copy_tree(saved_path, deploy_dir)
 copy_file("Dockerfile", deploy_dir+"/Dockerfile")
+
 
 if __name__ == '__main__':
     print("\nExample run")

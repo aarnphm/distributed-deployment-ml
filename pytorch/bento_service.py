@@ -21,8 +21,10 @@ class PytorchService(BentoService):
     def classify_categories(self, sentence):
         text_pipeline, _ = get_pipeline(self.artifacts.tokenizer, self.artifacts.vocab)
         with torch.no_grad():
-            text = torch.tensor(text_pipeline(sentence))  # embedding_bags #1 inputs has to be cpu
-            output = self.artifacts.model(text, offsets=torch.tensor([0]))
+            text = torch.tensor(text_pipeline(sentence)).to(device)
+            offsets = torch.tensor([0]).to(device)
+            # print(f"{text}\nsize:{text.size()}")
+            output = self.artifacts.model(text, offsets=offsets)
             return output.argmax(1).item() + 1
 
     @api(input=JsonInput(), output=JsonOutput())

@@ -14,7 +14,23 @@ compose: ## run all services together
 	docker-compose up
 
 .PHONY: pipe
-pipe: torch-pipe tf-pipe ## run both tensorflow and torch pipe
+pipe: torch-pipe tf-pipe onnx-pipe ## run tensorflow and torch, and onnx pipe
+
+.PHONY: onnx-e2e
+onnx-e2e: onnx-pipe onnx-d-r ## e2e pipeline from training to production onnx on BentoML
+
+.PHONY: onnx-pipe
+onnx-pipe: onnx-pack onnx-d ## our ONNX deployment pipeline with bentoml
+
+onnx-pack:
+	cd $(ONNX_DIR) && CUDA_LAUNCH_BLOCKING=1 python3 bento_packer.py
+
+onnx-d:
+	cd deploy/onnx_svc && docker build -t bento-onnx-gpu:latest .
+
+onnx-d-r:
+	# ldconfig -p | grep nvidia
+	docker run --gpus all -p 8000:5000 bento-onnx-gpu:latest
 
 .PHONY: torch-e2e
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML

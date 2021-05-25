@@ -1,5 +1,4 @@
 FROM nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04 as nvidia-cuda
-
 FROM bentoml/model-server:0.12.1-py38
 
 COPY --from=nvidia-cuda /usr/local/cuda-11.0 /usr/local/cuda

@@ -42,16 +42,30 @@ FROM nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04 as nvidia-cuda
 ...
 COPY --from=nvidia-cuda /usr/local/cuda-11.0 /usr/local/cuda
 COPY --from=nvidia-cuda /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64/
+# apparently tensorflow need this linked in order to use GPU
+RUN ln /usr/local/cuda/lib64/libcusolver.so.10 /usr/local/cuda/lib64/libcusolver.so.11
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
 ...
-# this is for pytorch only
-RUN python -m spacy download en_core_web_sm
+
+```
+
+### ONNX
+_relevant files can be found under [`onnx`](./onnx)_
+
+In order to run inference with GPU, users must use `onnxruntime-gpu` as the library will automatically allocate GPU
+resources to run inference, fallback to CPU if needed. User can check if they have GPU support with:
+
+```python
+...
+# assume the user is serving ONNX model with ONNXModelArtifacts, our ONNX session would be 
+# self.artifacts.model
+cuda = "CUDA" in session.get_providers()[0] # True
 ```
 
 ### PyTorch
 
-_relevant files can be found under `*_torch.py`_
+_relevant files can be found under [`pytorch`](./pytorch)_
 
 ```python
 import torch
@@ -62,7 +76,7 @@ model = model.to(device)
 
 ### Tensorflow
 
-_relevant files can be found under `*_tf.py`_
+_relevant files can be found under [`tf`](./tf)_
 
 ```python
 import tensorflow as tf

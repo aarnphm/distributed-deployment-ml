@@ -20,10 +20,10 @@ BATCH_SIZE = 64  # batch size for training
 EMSIZE = 64
 
 
-def get_tokenizer_vocab(tokenizer_fn='basic_english', root_data_dir='../dataset'):
+def get_tokenizer_vocab(dataset=AG_NEWS, tokenizer_fn='basic_english', root_data_dir='../dataset'):
     print('Getting tokenizer and vocab...')
     tokenizer = get_tokenizer(tokenizer_fn)
-    train_ = AG_NEWS(root=root_data_dir, split='train')
+    train_ = dataset(root=root_data_dir, split='train')
     counter = Counter()
     for (label, line) in train_:
         counter.update(tokenizer(line))
@@ -36,6 +36,13 @@ def get_pipeline(tokenizer, vocab):
     text_pipeline = lambda x: [vocab[token] for token in tokenizer(x)]
     label_pipeline = lambda x: int(x) - 1
     return text_pipeline, label_pipeline
+
+
+def get_train_valid_split(train_iter):
+    train_dataset = list(train_iter)
+    num_train = int(len(train_dataset) * 0.95)
+    split_train_, split_valid_ = random_split(train_dataset, [num_train, len(train_dataset) - num_train])
+    return split_train_, split_valid_
 
 
 def get_model_params(vocab):
@@ -59,11 +66,10 @@ def collate_batch(batch):
     return label_list.to(device), text_list.to(device), offsets.to(device)
 
 
-def train(model, data_loader, optimizer, criterion):
+def train(model, data_loader, optimizer, criterion, epoch):
     model.train()
     total_acc, total_count = 0, 0
     log_interval = 500
-    start_time = time.time()
 
     for idx, (label, text, offsets) in enumerate(data_loader):
         optimizer.zero_grad()
@@ -75,10 +81,8 @@ def train(model, data_loader, optimizer, criterion):
         total_acc += (predicted.argmax(1) == label).sum().item()
         total_count += label.size(0)
         if idx % log_interval == 0 and idx > 0:
-            elapsed = time.time() - start_time
-            print(f'| epoch {epoch:3d} | {idx:5d}/{len(data_loader):5d} batches | accuracy {(total_acc / total_count):8.3f} | took {elapsed:5.2f}s')
+            print(f'| epoch {epoch:3d} | {idx:5d}/{len(data_loader):5d} batches | accuracy {(total_acc / total_count):5.3f}')
             total_acc, total_count = 0, 0
-            start_time = time.time()
 
 
 def evaluate(model, data_loader, criterion):
@@ -107,19 +111,16 @@ if __name__ == '__main__':
     total_accu = None
 
     train_iter, test_iter = AG_NEWS(root='../dataset')
-    train_dataset = list(train_iter)
     test_dataset = list(test_iter)
-    num_train = int(len(train_dataset) * 0.95)
-    split_train_, split_valid_ = random_split(train_dataset, [num_train, len(train_dataset) - num_train])
+    split_train_, split_valid_ = get_train_valid_split(train_iter)
 
-    assert text_pipeline is not None and label_pipeline is not None
     train_data_loader = DataLoader(split_train_, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
     valid_data_loader = DataLoader(split_valid_, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
     test_data_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
 
     for epoch in range(1, EPOCHS + 1):
         epoch_start_time = time.time()
-        train(model, train_data_loader, optimizer, criterion)
+        train(model, train_data_loader, optimizer, criterion, epoch)
         accu_val = evaluate(model, valid_data_loader, criterion)
         if total_accu is not None and total_accu > accu_val:
             scheduler.step()
@@ -127,7 +128,7 @@ if __name__ == '__main__':
             total_accu = accu_val
             torch.save(model.state_dict(), '../model/pytorch/pytorch_model.pt')
         print('-' * 59)
-        print(f'| end of epoch {epoch:3d} | time: {time.time() - epoch_start_time:5.2f}s | valid accuracy {accu_val:8.3f}')
+        print(f'| end of epoch {epoch:1d} | time: {time.time() - epoch_start_time:5.2f}s | valid accuracy {accu_val:8.3f}')
         print('-' * 59)
 
     print('Checking the results of test dataset.')

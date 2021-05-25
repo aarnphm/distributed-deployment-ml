@@ -1,9 +1,9 @@
 version: 0.12.1
 kind: BentoService
 metadata:
-  created_at: 2021-05-25 06:11:08.801920
+  created_at: 2021-05-25 14:39:56.363118
   service_name: PytorchService
-  service_version: 20210525131106_0D7508
+  service_version: 20210525213954_FB0178
   module_name: bento_service
   module_file: bento_service.py
 env:
