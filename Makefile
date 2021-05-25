@@ -1,6 +1,6 @@
 .DEFAULT_GOAL=pipe
 TENSORFLOW_DIR=tf
-PYTORCH_DIR=torch
+PYTORCH_DIR=pytorch
 ONNX_DIR=onnx
 
 .PHONY: help
@@ -20,13 +20,13 @@ pipe: torch-pipe tf-pipe ## run both tensorflow and torch pipe
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
 
 torch-train:
-	cd $(PYTORCH_DIR) && python train.py
+	cd $(PYTORCH_DIR) && python3 train.py
 
 .PHONY: torch-pipe
 torch-pipe: torch-pack torch-d ## our pytorch deployment pipeline with bentoml
 
 torch-pack:
-	cd $(PYTORCH_DIR) && python bento_packer.py
+	cd $(PYTORCH_DIR) && python3 bento_packer.py
 
 torch-d:
 	cd deploy/torch_svc && docker build -t bento-torch-gpu:latest .
@@ -39,16 +39,16 @@ torch-d-r:
 tf-e2e: tf-train tf-pipe tf-d-r  ## e2e pipeline from training to production tf on BentoML
 
 tf-train:
-	cd $(TENSORFLOW_DIR) && python train.py
+	cd $(TENSORFLOW_DIR) && python3 train.py
 
 .PHONY: tf-pipe
 tf-pipe: tf-pack tf-d ## our tensorflow deployment pipeline with bentoml
 
 tf-pack:
-	cd $(TENSORFLOW_DIR) && python bento_packer.py
+	cd $(TENSORFLOW_DIR) && python3 bento_packer.py
 
 tf-d:
 	cd deploy/tf_svc && docker build -t bento-tf-gpu:latest .
 
 tf-d-r:
-	docker run --gpus all-p 6000:5000 bento-tf-gpu:latest
+	docker run --gpus all -p 6000:5000 bento-tf-gpu:latest

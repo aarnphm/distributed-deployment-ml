@@ -28,7 +28,7 @@ class IMDB:
 
         print('Loading IMDB dataset')
         df = pd.read_csv('../dataset/imdb.csv', names=["X", "Y"], skiprows=1)
-        print(df.head())
+        # print(df.head())
 
         # cast X to str and preprocess
         df['X'] = df.X.apply(str)
@@ -36,8 +36,6 @@ class IMDB:
 
         X = df.X
         Y = df.Y
-
-        print(df.head())
 
         # encode labels
         label_encoder = LabelEncoder()

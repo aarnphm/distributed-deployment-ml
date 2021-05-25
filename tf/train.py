@@ -28,7 +28,7 @@ if __name__ == '__main__':
             imdb.X_train,
             imdb.Y_train,
             batch_size=512,
-            epochs=4,
+            epochs=10,
             validation_split=0.2,
             callbacks=[EarlyStopping(patience=2, verbose=1)],
         )
@@ -42,15 +42,15 @@ if __name__ == '__main__':
         )
 
         # save weights as HDF5
-        model.save("../model/weights.h5")
+        model.save("../model/tf/weights.h5")
         print("Saved model to disk")
 
         # save model as JSON
         model_json = model.to_json()
-        with open("../model/model.json", "w") as file:
+        with open("../model/tf/model.json", "w") as file:
             file.write(model_json)
 
         # save tokenizer as JSON
         tokenizer_json = imdb.tokenizer.to_json()
-        with open("../model/tokenizer.json", 'w', encoding='utf-8') as file:
+        with open("../model/tf/tokenizer.json", 'w', encoding='utf-8') as file:
             file.write(json.dumps(tokenizer_json, ensure_ascii=True))
