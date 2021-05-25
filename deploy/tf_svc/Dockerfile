@@ -4,6 +4,7 @@ FROM bentoml/model-server:0.12.1-py38
 
 COPY --from=nvidia-cuda /usr/local/cuda-11.0 /usr/local/cuda
 COPY --from=nvidia-cuda /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64/
+RUN ln /usr/local/cuda/lib64/libcusolver.so.10 /usr/local/cuda/lib64/libcusolver.so.11
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
 

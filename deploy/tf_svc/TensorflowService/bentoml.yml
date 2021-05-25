@@ -1,22 +1,22 @@
 version: 0.12.1
 kind: BentoService
 metadata:
-  created_at: 2021-05-21 10:17:33.590629
+  created_at: 2021-05-25 06:13:17.486314
   service_name: TensorflowService
-  service_version: 20210521171731_6BD9E4
+  service_version: 20210525131315_B3B31C
   module_name: bento_service
   module_file: bento_service.py
 env:
   pip_packages:
   - bentoml==0.12.1
-  - tensorflow==2.4.0
-  - scikit-learn==0.24.1
-  - pandas==1.2.2
+  - tensorflow==2.5.0
+  - scikit-learn==0.24.2
+  - pandas==1.2.4
   conda_env:
     name: bentoml-default-conda-env
     dependencies: []
-  python_version: 3.8.5
-  docker_base_image: bentoml/model-server:0.12.1-py38
+  python_version: 3.9.4
+  docker_base_image: bentoml/model-server:0.12.1
 apis:
 - name: predict
   docs: "BentoService inference API 'predict', input: 'JsonInput', output: 'DefaultOutput'"

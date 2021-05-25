@@ -1,4 +1,3 @@
-import numpy as np
 from bentoml import BentoService, api, artifacts, env
 from bentoml.adapters import JsonInput
 from bentoml.frameworks.keras import KerasModelArtifact
@@ -9,7 +8,7 @@ from tensorflow.keras.preprocessing.text import text_to_word_sequence
 from data import preprocess
 
 
-@env(pip_packages=['tensorflow==2.4.0', 'scikit-learn', 'pandas'])
+@env(pip_packages=['tensorflow', 'scikit-learn', 'pandas'])
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):
@@ -28,5 +27,4 @@ class TensorflowService(BentoService):
         raw = self.preprocessing(parsed_json['text'])
         input_data = [raw[: n + 1] for n in range(len(raw))]
         input_data = pad_sequences(input_data, maxlen=100, padding="post")
-        sentiment = self.artifacts.model.predict(input_data, verbose=1, batch_size=1)
-        return np.argmax(sentiment)
+        return self.artifacts.model.predict(input_data, verbose=1, batch_size=1)
