@@ -22,6 +22,7 @@ model.compile(loss='binary_crossentropy', optimizer=RMSprop(), metrics=['accurac
 imdb = IMDB(MAX_SEQ_LEN, VOCAB_SIZE)
 
 if __name__ == '__main__':
+    # people can find their devices using tf.config.list_physical_devices("GPU") # "CPU"
     with tf.device("/GPU:0"):
         # Model Training
         model.fit(

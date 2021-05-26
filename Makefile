@@ -30,7 +30,7 @@ onnx-d:
 
 onnx-d-r:
 	# ldconfig -p | grep nvidia
-	docker run --gpus all -p 8000:5000 bento-onnx-gpu:latest
+	docker run --gpus all -p 50053:5000 bento-onnx-gpu:latest
 
 .PHONY: torch-e2e
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
@@ -49,7 +49,7 @@ torch-d:
 
 torch-d-r:
 	# ldconfig -p | grep nvidia
-	docker run --gpus all -p 7000:5000 bento-torch-gpu:latest
+	docker run --gpus all -p 50052:5000 bento-torch-gpu:latest
 
 .PHONY: tf-e2e
 tf-e2e: tf-train tf-pipe tf-d-r  ## e2e pipeline from training to production tf on BentoML
@@ -67,4 +67,4 @@ tf-d:
 	cd deploy/tf_svc && docker build -t bento-tf-gpu:latest .
 
 tf-d-r:
-	docker run --gpus all -p 6000:5000 bento-tf-gpu:latest
+	docker run --gpus all -p 50051:5000 bento-tf-gpu:latest

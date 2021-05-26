@@ -11,7 +11,7 @@ from train import get_model_params, get_tokenizer_vocab
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 trained_path = "../model/pytorch"
-deploy_dir = "../deploy/torch_svc"
+deploy_dir = "../bento_svc/torch_svc"
 artifacts_dir = os.path.join(deploy_dir, "PytorchService")
 
 if not os.path.exists(deploy_dir):

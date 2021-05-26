@@ -27,10 +27,10 @@ except Exception:
     install_reqs = []
 
 setuptools.setup(
-    name='PytorchService',
-    version='20210525213954_FB0178',
+    name='OnnxService',
+    version='20210526085617_2E31B5',
     description="BentoML generated model module",
-    long_description="""# Generated BentoService bundle - PytorchService:20210525213954_FB0178
+    long_description="""# Generated BentoService bundle - OnnxService:20210526085617_2E31B5
 
 This is a ML Service bundle created with BentoML, it is not recommended to edit
 code or files contained in this directory. Instead, edit the code that uses BentoML
@@ -42,11 +42,11 @@ to create this bundle, and save a new BentoService bundle.
     install_requires=install_reqs,
     include_package_data=True,
     package_data={
-        'PytorchService': ['bentoml.yml', 'artifacts/*']
+        'OnnxService': ['bentoml.yml', 'artifacts/*']
     },
     entry_points={
         'console_scripts': [
-            'PytorchService=PytorchService:cli',
+            'OnnxService=OnnxService:cli',
         ],
     }
 )

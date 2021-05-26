@@ -5,6 +5,8 @@ from torchtext.data.utils import get_tokenizer
 from collections import Counter
 from torchtext.vocab import Vocab
 
+# https://www.onnxruntime.ai/python/auto_examples/plot_common_errors.html
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 EMSIZE = 64

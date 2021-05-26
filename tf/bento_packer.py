@@ -12,7 +12,7 @@ from bento_service import TensorflowService
 gpu = config.experimental.list_physical_devices('GPU')
 config.experimental.set_memory_growth(gpu[0], True)
 
-deploy_dir = "../deploy/tf_svc"
+deploy_dir = "../bento_svc/tf_svc"
 dockerfile = "Dockerfile"
 dockerfile_deploy = f"{deploy_dir}/Dockerfile"
 

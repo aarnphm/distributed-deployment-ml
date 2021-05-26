@@ -8,15 +8,15 @@ import torch
 from bento_service import OnnxService
 from helpers import TextClassificationModel, get_model_params, get_tokenizer_vocab
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-deploy_dir = "../deploy/onnx_svc"
+deploy_dir = "../bento_svc/onnx_svc"
 artifacts_dir = os.path.join(deploy_dir, "OnnxService")
 onnx_model_path = "../model/onnx/pytorch_model.onnx"
 
 
-def tolong(tensor):
-    return tensor.detach().long().to(device) if tensor.requires_grad else tensor.long().to(device)
+# def tolong(tensor):
+#     return tensor.detach().long().to(device) if tensor.requires_grad else tensor.long().to(device)
 
 
 if not os.path.exists(deploy_dir):
@@ -29,9 +29,10 @@ model.load_state_dict(torch.load("../model/pytorch/pytorch_model.pt"))
 model.eval()
 
 print("\nExporting torch model to onnx...")
-inp = tolong(torch.rand(vocab_size, requires_grad=True).to(device))  # turn our input into a cuda tensor.
-# print(f"input tensor:\n{inp}\nshape:{inp.size()}")
-# print(f"last layer output: {model.fc(inp).size()}")
+# inp = tolong(torch.rand(vocab_size, requires_grad=True).to(device))  # turn our input into a cuda tensor.
+# inp = torch.rand(1,batch_size, 224,244).long().to(device)
+inp = torch.rand(vocab_size).long().to(device)
+
 
 torch.onnx.export(model, inp, onnx_model_path, export_params=True, opset_version=11, do_constant_folding=True,
                   input_names=["input"], output_names=["output"],

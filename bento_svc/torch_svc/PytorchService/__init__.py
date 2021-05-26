@@ -10,11 +10,11 @@ from bentoml.cli.bento_service import create_bento_service_cli
 # --verbose CLI option, user can change the CLI output behavior
 configure_logging(logging.ERROR)
 
-__VERSION__ = "20210525220853_298AA0"
+__VERSION__ = "20210526090629_3A6BF4"
 
 __module_path = os.path.abspath(os.path.dirname(__file__))
 
-OnnxService = saved_bundle.load_bento_service_class(__module_path)
+PytorchService = saved_bundle.load_bento_service_class(__module_path)
 
 cli=create_bento_service_cli(__module_path)
 
@@ -23,4 +23,4 @@ def load():
     return saved_bundle.load_from_dir(__module_path)
 
 
-__all__ = ['__version__', 'OnnxService', 'load']
+__all__ = ['__version__', 'PytorchService', 'load']

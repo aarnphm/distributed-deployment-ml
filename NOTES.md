@@ -1,12 +1,49 @@
 ## <b>NVIDIA Triton Server</b>
+- managed their docker images from a [entrypoint.sh](https://github.com/triton-inference-server/server/blob/main/nvidia_entrypoint.sh) and a [build.py](https://github.com/triton-inference-server/server/blob/main/build.py)
+- drawbacks:
+    - their buildscripts are mainly ```cp``` binary built to the model and also include a cuda-enabled images as their base layer
+    - not elegant and hard to maintain for developers
+ 
+- How PyTorch and Tensorflow managed their docker images
+  
+#### PyTorch
+
 
 ## <b>Tensorflow Serving</b>
 
 ## <b>TorchServe</b>
 
+## Running GPU in a Kubernetes Cluster
+
+[NVIDIA's device plugins](https://github.com/NVIDIA/k8s-device-plugin) for kubernetes
+
+- driver has to be manually installed, referred to [here](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers)
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded.yaml
+```
+
+- configuring pods to consume GPUs
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-gpu-pod
+spec:
+  containers:
+  - name: my-gpu-container
+    image: nvidia/cuda:10.0-runtime-ubuntu18.04
+    command: ["/bin/bash", "-c", "--"]
+    args: ["while true; do sleep 600; done;"]
+    resources:
+      limits:
+       nvidia.com/gpu: 2
+```
+
+
 ## <b>Notes from NVIDIA docker container</b>
 
-recent updates from systemd rearchitecture broke `nvidia-docker`, refers to [#1447](https://github.com/NVIDIA/nvidia-docker/issues/1447). This issue is confirmed to be in the [patched](https://github.com/NVIDIA/nvidia-docker/issues/1447#issuecomment-760189260) for **future releases**.
+recent updates from systemd re-architecture broke `nvidia-docker`, refers to [#1447](https://github.com/NVIDIA/nvidia-docker/issues/1447). This issue is confirmed to be in the [patched](https://github.com/NVIDIA/nvidia-docker/issues/1447#issuecomment-760189260) for **future releases**.
 
 current workaround:
 
@@ -26,7 +63,6 @@ devices:
   - /dev/nvidia-uvm:/dev/nvidia-uvm
   - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
 ```
-
 
 ## <b>Serving with BentoML</b>
 
@@ -54,12 +90,13 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
 _relevant files can be found under [`onnx`](./onnx)_
 
 In order to run inference with GPU, users must use `onnxruntime-gpu` as the library will automatically allocate GPU
-resources to run inference, fallback to CPU if needed. User can check if they have GPU support with:
+resources to run inference, fallback to CPU if needed. 
+
+User can check if they have GPU support with [`get_providers()`](https://github.com/microsoft/onnxruntime/blob/78a29aebbcbd0c3b6dab734f221e0f3bf1e24c97/onnxruntime/python/session.py#L49-L86):
 
 ```python
 ...
-# assume the user is serving ONNX model with ONNXModelArtifacts, our ONNX session would be 
-# self.artifacts.model
+# for ONNXModelArtifacts, session=self.artifacts.model
 cuda = "CUDA" in session.get_providers()[0] # True
 ```
 
