@@ -8,7 +8,7 @@ import torch
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## cuda
 
 
-@env(infer_pip_packages=True, pip_packages=['torchtext'], docker_base_image="nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04")
+@env(infer_pip_packages=True, pip_packages=['torchtext'])
 @artifacts([PytorchModelArtifact("model"), PickleArtifact("tokenizer"), PickleArtifact("vocab")])
 class PytorchService(BentoService):
     def __init__(self):

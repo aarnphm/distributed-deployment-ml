@@ -1,4 +1,11 @@
-FROM nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04
+#FROM nvidia/cuda:11.0-cudnn8-runtime-ubuntu16.04 as nvidia-cuda
+FROM bentoml/model-server:0.12.1-py38
+
+#COPY --from=nvidia-cuda /usr/local/cuda /usr/local/cuda
+#COPY --from=nvidia-cuda /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64/
+#RUN ln /usr/local/cuda/lib64/libcusolver.so.10 /usr/local/cuda/lib64/libcusolver.so.11
+#ENV PATH=/usr/local/cuda/bin:$PATH
+#ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
 
 # Configure PIP install arguments, e.g. --index-url, --trusted-url, --extra-index-url
 ARG EXTRA_PIP_INSTALL_ARGS=
@@ -34,6 +41,9 @@ RUN ./bentoml-init.sh install_pip_packages
 
 COPY --chown=bentoml:bentoml docker-entrypoint.sh bundled_pip_dependencie[s]  ./bundled_pip_dependencies/
 RUN rm ./bundled_pip_dependencies/docker-entrypoint.sh && ./bentoml-init.sh install_bundled_pip_packages
+
+RUN conda install pytorch torchtext cudatoolkit=10.2 -c pytorch
+
 
 # copy over model files
 COPY --chown=bentoml:bentoml . ./

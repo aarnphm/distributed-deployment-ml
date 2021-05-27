@@ -1,4 +1,4 @@
-# Generated BentoService bundle - PytorchService:20210526090629_3A6BF4
+# Generated BentoService bundle - PytorchService:20210527004546_465159
 
 This is a ML Service bundle created with BentoML, it is not recommended to edit
 code or files contained in this directory. Instead, edit the code that uses BentoML

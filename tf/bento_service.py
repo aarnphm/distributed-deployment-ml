@@ -27,4 +27,4 @@ class TensorflowService(BentoService):
         raw = self.preprocessing(parsed_json['text'])
         input_data = [raw[: n + 1] for n in range(len(raw))]
         input_data = pad_sequences(input_data, maxlen=100, padding="post")
-        return self.artifacts.model.predict(input_data, verbose=1, batch_size=1)
+        return self.artifacts.model.predict(input_data)

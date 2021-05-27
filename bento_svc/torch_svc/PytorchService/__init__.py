@@ -10,7 +10,7 @@ from bentoml.cli.bento_service import create_bento_service_cli
 # --verbose CLI option, user can change the CLI output behavior
 configure_logging(logging.ERROR)
 
-__VERSION__ = "20210526090629_3A6BF4"
+__VERSION__ = "20210527004546_465159"
 
 __module_path = os.path.abspath(os.path.dirname(__file__))
 

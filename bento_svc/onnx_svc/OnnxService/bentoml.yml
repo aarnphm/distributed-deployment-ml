@@ -1,9 +1,9 @@
 version: 0.12.1
 kind: BentoService
 metadata:
-  created_at: 2021-05-26 01:56:19.559595
+  created_at: 2021-05-26 18:00:24.100149
   service_name: OnnxService
-  service_version: 20210526085617_2E31B5
+  service_version: 20210527010022_9BB360
   module_name: bento_service
   module_file: bento_service.py
 env:

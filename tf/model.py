@@ -2,7 +2,7 @@ from tensorflow.keras.layers import Activation, Dense, Dropout, Embedding, LSTM
 from tensorflow.keras.models import Sequential
 
 
-# TF RNN tfmodel.
+# TF RNN model.
 def RNN(max_seq_len, vocab_size):
     model = Sequential()
     model.add(Embedding(vocab_size, 64, input_length=max_seq_len))

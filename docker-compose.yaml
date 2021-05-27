@@ -6,7 +6,7 @@ services:
       context: bento_svc/tf_svc
       dockerfile: Dockerfile
     ports:
-      - "6000:5000"
+      - "50051:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl
@@ -19,7 +19,7 @@ services:
       context: bento_svc/torch_svc
       dockerfile: Dockerfile
     ports:
-      - "7000:5000"
+      - "50052:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl
@@ -32,7 +32,7 @@ services:
       context: bento_svc/onnx_svc
       dockerfile: Dockerfile
     ports:
-      - "8000:5000"
+      - "50053:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl
