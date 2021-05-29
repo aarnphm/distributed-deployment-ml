@@ -1,21 +1,26 @@
 version: 0.12.1
 kind: BentoService
 metadata:
-  created_at: 2021-05-26 17:45:48.032205
+  created_at: 2021-05-29 07:57:52.205765
   service_name: PytorchService
-  service_version: '20210527004546_465159'
+  service_version: 20210529145750_F8C1D3
   module_name: bento_service
   module_file: bento_service.py
 env:
   pip_packages:
   - bentoml==0.12.1
-  - torchtext==0.9.1
-  - torch==1.8.1
+  - torch==1.8.1+cu111
   conda_env:
     name: bentoml-default-conda-env
-    dependencies: []
-  python_version: 3.9.4
-  docker_base_image: bentoml/model-server:0.12.1
+    dependencies:
+    - pytorch
+    - torchtext
+    - cudatoolkit=11.1
+    channels:
+    - pytorch
+    - nvidia
+  python_version: 3.8.8
+  docker_base_image: bentoml/model-server:0.12.1-py38
 apis:
 - name: predict
   docs: "BentoService inference API 'predict', input: 'JsonInput', output: 'JsonOutput'"

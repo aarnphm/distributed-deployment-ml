@@ -5,10 +5,10 @@ from bentoml.service.artifacts.pickle import PickleArtifact
 from train import get_pipeline
 import torch
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## cuda
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # cuda
 
 
-@env(infer_pip_packages=True, pip_packages=['torchtext'])
+@env(conda_dependencies=['pytorch','torchtext', 'cudatoolkit=11.1'], conda_channels=['pytorch', 'nvidia'], requirements_txt_file=None)
 @artifacts([PytorchModelArtifact("model"), PickleArtifact("tokenizer"), PickleArtifact("vocab")])
 class PytorchService(BentoService):
     def __init__(self):

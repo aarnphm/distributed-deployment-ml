@@ -1,1 +1,36 @@
-apiVersion:
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: tf_svc
+    name: tf_svc
+spec:
+    ports:
+    - name: predict
+      port: 50051
+      targetPort: 5000
+    selector:
+      app: tf_svc
+    type: NodePort
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        app: 
+    name: iris-classifier
+spec:
+    selector:
+        matchLabels:
+            app: iris-classifier
+    template:
+        metadata:
+            labels:
+                app: iris-classifier
+        spec:
+            containers:
+            - image: {docker_username}/iris-classifier
+              imagePullPolicy: IfNotPresent
+              name: iris-classifier
+              ports:
+              - containerPort: 5000

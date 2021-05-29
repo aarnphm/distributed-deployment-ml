@@ -1,2 +1,8 @@
 name: bentoml-default-conda-env
-dependencies: []
+dependencies:
+- pytorch
+- torchtext
+- cudatoolkit=11.1
+channels:
+- pytorch
+- nvidia

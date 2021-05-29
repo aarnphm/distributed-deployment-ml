@@ -8,7 +8,6 @@
   
 #### PyTorch
 
-
 ## <b>Tensorflow Serving</b>
 
 ## <b>TorchServe</b>
@@ -42,6 +41,12 @@ spec:
 
 
 ## <b>Notes from NVIDIA docker container</b>
+
+web ui -> choose a higher level api -> if not then we structure way to use lower api
+
+overwrite 
+
+proposal for docker images
 
 recent updates from systemd re-architecture broke `nvidia-docker`, refers to [#1447](https://github.com/NVIDIA/nvidia-docker/issues/1447). This issue is confirmed to be in the [patched](https://github.com/NVIDIA/nvidia-docker/issues/1447#issuecomment-760189260) for **future releases**.
 
@@ -126,3 +131,5 @@ with tf.device("/GPU:0"):
     ...
 
 ```
+
+- errors when running `yatai-start` 
