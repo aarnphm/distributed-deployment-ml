@@ -1,0 +1,65 @@
+---
+### Tensorflow Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pr
+  name: pr
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pr
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: pr
+    spec:
+      containers:
+        - image: aar0npham/dha-pr:with-nocuda
+          imagePullPolicy: Always
+          name: pr
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: pr
+                  key: MONGO_URI
+          resources:
+            requests:
+              cpu: "250m"
+      imagePullSecrets:
+        - name: regcred
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+
+---
+### Price Recommender Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pr
+  name: pr-service
+  namespace: default
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - nodePort: 32610
+      port: 30000
+      protocol: TCP
+      targetPort: 5000
+  selector:
+    app: pr
+  sessionAffinity: None
+  type: NodePort
