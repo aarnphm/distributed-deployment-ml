@@ -8,9 +8,9 @@ from bentoml.cli.bento_service import create_bento_service_cli
 # By default, ignore warnings when loading BentoService installed as PyPI distribution
 # CLI will change back to default log level in config(info), and by adding --quiet or
 # --verbose CLI option, user can change the CLI output behavior
-configure_logging(logging.ERROR)
+configure_logging(logging_level=logging.ERROR)
 
-__VERSION__ = "20210527010022_9BB360"
+__VERSION__ = "20210530113915_7088C2"
 
 __module_path = os.path.abspath(os.path.dirname(__file__))
 
