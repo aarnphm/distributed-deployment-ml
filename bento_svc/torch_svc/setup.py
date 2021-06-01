@@ -28,9 +28,9 @@ except Exception:
 
 setuptools.setup(
     name='PytorchService',
-    version='20210529145750_F8C1D3',
+    version='20210601215809_63B896',
     description="BentoML generated model module",
-    long_description="""# Generated BentoService bundle - PytorchService:20210529145750_F8C1D3
+    long_description="""# Generated BentoService bundle - PytorchService:20210601215809_63B896
 
 This is a ML Service bundle created with BentoML, it is not recommended to edit
 code or files contained in this directory. Instead, edit the code that uses BentoML
