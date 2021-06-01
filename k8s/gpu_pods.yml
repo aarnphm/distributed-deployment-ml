@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  containers:
+    - name: cuda-container
+      image: nvcr.io/nvidia/cuda:11.3.0-cudnn8-runtime-ubuntu18.04
+      resources:
+        limits:
+          nvidia.com/gpu: 1 # requesting 1 GPUs

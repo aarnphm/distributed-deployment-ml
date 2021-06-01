@@ -4,62 +4,48 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: pr
-  name: pr
+    app: tf-svc
+  name: tf-svc
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: pr
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      app: tf-svc
   template:
     metadata:
       labels:
-        app: pr
+        app: tf-svc
     spec:
       containers:
-        - image: aar0npham/dha-pr:with-nocuda
+        - name: bento-container
+          image: aarnphm/bento-tf-gpu:latest
           imagePullPolicy: Always
-          name: pr
-          env:
-            - name: MONGO_URI
-              valueFrom:
-                secretKeyRef:
-                  name: pr
-                  key: MONGO_URI
+          name: tf-svc
           resources:
-            requests:
-              cpu: "250m"
-      imagePullSecrets:
-        - name: regcred
-      dnsPolicy: ClusterFirst
+            limits:
+              nvidia.com/gpu: 1
       restartPolicy: Always
-      schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
 
 ---
-### Price Recommender Service
+### Tensorflow Service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: pr
-  name: pr-service
-  namespace: default
+    app: tf-svc
+  name: tf-svc
 spec:
   externalTrafficPolicy: Cluster
   ports:
-    - nodePort: 32610
-      port: 30000
+    - name: predict
+      nodePort: 32610
+      port: 60061
       protocol: TCP
       targetPort: 5000
   selector:
-    app: pr
+    app: tf-svc
   sessionAffinity: None
-  type: NodePort
+  type: LoadBalancer
