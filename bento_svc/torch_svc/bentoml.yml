@@ -1,24 +1,17 @@
 version: 0.12.1
 kind: BentoService
 metadata:
-  created_at: 2021-06-01 14:58:11.665594
+  created_at: 2021-06-02 00:05:50.459778
   service_name: PytorchService
-  service_version: 20210601215809_63B896
+  service_version: 20210602070548_804E0C
   module_name: bento_service
   module_file: bento_service.py
 env:
   pip_packages:
   - bentoml==0.12.1
-  - torch==1.8.1+cu111
   conda_env:
     name: bentoml-default-conda-env
-    dependencies:
-    - pytorch
-    - torchtext
-    - cudatoolkit=11.1
-    channels:
-    - pytorch
-    - nvidia
+    dependencies: []
   python_version: 3.8.8
   docker_base_image: bentoml/model-server:0.12.1-py38
 apis:

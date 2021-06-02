@@ -28,9 +28,9 @@ except Exception:
 
 setuptools.setup(
     name='TensorflowService',
-    version='20210529160025_BCF78B',
+    version='20210601234258_7178C3',
     description="BentoML generated model module",
-    long_description="""# Generated BentoService bundle - TensorflowService:20210529160025_BCF78B
+    long_description="""# Generated BentoService bundle - TensorflowService:20210601234258_7178C3
 
 This is a ML Service bundle created with BentoML, it is not recommended to edit
 code or files contained in this directory. Instead, edit the code that uses BentoML

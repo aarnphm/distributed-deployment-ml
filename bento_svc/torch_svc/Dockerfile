@@ -31,6 +31,7 @@ RUN ./bentoml-init.sh restore_conda_env
 
 COPY --chown=bentoml:bentoml requirements.txt ./
 RUN ./bentoml-init.sh install_pip_packages
+RUN pip3 install torch==1.8.1+cu111 torchtext -f https://download.pytorch.org/whl/torch_stable.html
 
 COPY --chown=bentoml:bentoml docker-entrypoint.sh bundled_pip_dependencie[s]  ./bundled_pip_dependencies/
 RUN rm ./bundled_pip_dependencies/docker-entrypoint.sh && ./bentoml-init.sh install_bundled_pip_packages

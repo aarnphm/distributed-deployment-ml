@@ -1,11 +1,4 @@
-FROM nvidia/cuda:11.3.0-cudnn8-runtime-ubuntu18.04 as nvidia-cuda
 FROM bentoml/model-server:0.12.1-py38
-
-COPY --from=nvidia-cuda /usr/local/cuda /usr/local/cuda
-COPY --from=nvidia-cuda /usr/lib/x86_64-linux-gnu/libcudnn* /usr/local/cuda/lib64/
-RUN ln /usr/local/cuda/lib64/libcusolver.so.11 /usr/local/cuda/lib64/libcusolver.so.10
-ENV PATH=/usr/local/cuda/bin:$PATH
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
 
 # Configure PIP install arguments, e.g. --index-url, --trusted-url, --extra-index-url
 ARG EXTRA_PIP_INSTALL_ARGS=
@@ -38,6 +31,7 @@ RUN ./bentoml-init.sh restore_conda_env
 
 COPY --chown=bentoml:bentoml requirements.txt ./
 RUN ./bentoml-init.sh install_pip_packages
+RUN pip3 install torch==1.8.1+cu111 torchtext -f https://download.pytorch.org/whl/torch_stable.html
 
 COPY --chown=bentoml:bentoml docker-entrypoint.sh bundled_pip_dependencie[s]  ./bundled_pip_dependencies/
 RUN rm ./bundled_pip_dependencies/docker-entrypoint.sh && ./bentoml-init.sh install_bundled_pip_packages

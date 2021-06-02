@@ -8,7 +8,9 @@ import torch
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # cuda
 
 
-@env(conda_dependencies=['pytorch','torchtext', 'cudatoolkit=11.1'], conda_channels=['pytorch', 'nvidia'], requirements_txt_file=None)
+# @env(conda_dependencies=['pytorch', 'torchtext', 'cudatoolkit=11.1'], conda_channels=['pytorch', 'nvidia'],
+#      requirements_txt_file=None)
+@env(infer_pip_packages=False)
 @artifacts([PytorchModelArtifact("model"), PickleArtifact("tokenizer"), PickleArtifact("vocab")])
 class PytorchService(BentoService):
     def __init__(self):
@@ -23,7 +25,6 @@ class PytorchService(BentoService):
         with torch.no_grad():
             text = torch.tensor(text_pipeline(sentence)).to(device)
             offsets = torch.tensor([0]).to(device)
-            # print(f"{text}\nsize:{text.size()}")
             output = self.artifacts.model(text, offsets=offsets)
             return output.argmax(1).item() + 1
 
