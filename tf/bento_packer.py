@@ -3,7 +3,6 @@ import json
 from tensorflow import config
 
 from distutils.dir_util import copy_tree
-from distutils.file_util import copy_file
 from tensorflow.keras.models import model_from_json
 from tensorflow.keras.preprocessing.text import tokenizer_from_json
 
@@ -13,8 +12,6 @@ gpu = config.experimental.list_physical_devices('GPU')
 config.experimental.set_memory_growth(gpu[0], True)
 
 deploy_dir = "../bento_svc/tf_svc"
-dockerfile = "Dockerfile"
-dockerfile_deploy = f"{deploy_dir}/Dockerfile"
 
 if not os.path.exists(deploy_dir):
     os.makedirs(deploy_dir, exist_ok=True)
@@ -48,7 +45,6 @@ bento_svc.pack('tokenizer', tokenizer)
 saved_path = bento_svc.save()
 
 copy_tree(saved_path, deploy_dir)
-copy_file(dockerfile, dockerfile_deploy)
 
 if __name__ == '__main__':
     print("\nExample run:")

@@ -4,7 +4,7 @@ services:
     image: bento-tf-gpu:latest
     build:
       context: bento_svc/tf_svc
-      dockerfile: Dockerfile
+      dockerfile: tf/Dockerfile
     ports:
       - "50051:5000"
     devices:

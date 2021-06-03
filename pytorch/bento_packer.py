@@ -1,6 +1,6 @@
 import os
 from distutils.dir_util import copy_tree
-from distutils.file_util import copy_file
+# from distutils.file_util import copy_file
 
 import torch
 
@@ -31,7 +31,7 @@ bento_svc.pack("vocab", vocab)
 saved_path = bento_svc.save()
 
 copy_tree(saved_path, deploy_dir)
-copy_file("Dockerfile", deploy_dir+"/Dockerfile")
+# copy_file("Dockerfile", deploy_dir+"/Dockerfile")
 
 
 if __name__ == '__main__':

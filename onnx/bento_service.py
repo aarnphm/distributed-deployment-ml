@@ -14,7 +14,7 @@ def to_numpy(tensor):
     return tensor.detach().cpu().clone().numpy() if tensor.requires_grad else tensor.cpu().clone().numpy()
 
 
-@env(infer_pip_packages=True, pip_packages=['onnxruntime-gpu'])
+@env(infer_pip_packages=False, pip_packages=['onnxruntime-gpu'], requirements_txt_file="./requirements.txt", docker_base_image="bentoml/model-server:0.12.1-py38-gpu")
 @artifacts(
     [OnnxModelArtifact('model', backend='onnxruntime-gpu'), PickleArtifact('tokenizer'), PickleArtifact('vocab')])
 class OnnxService(BentoService):
