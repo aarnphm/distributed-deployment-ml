@@ -34,7 +34,7 @@ onnx-d:
 	cd bento_svc/onnx_svc && docker build -t bento-onnx-gpu:latest .
 
 onnx-d-r:
-	docker run --gpus all -p 60053:5000 $(DEVICE_ARGS) bento-onnx-gpu:latest
+	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-onnx-gpu:latest
 
 .PHONY: torch-e2e
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
@@ -52,7 +52,7 @@ torch-d:
 	cd bento_svc/torch_svc && docker build -t bento-torch-gpu:latest .
 
 torch-d-r:
-	docker run --gpus all -p 60052:5000 $(DEVICE_ARGS) bento-torch-gpu:latest
+	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-torch-gpu:latest
 
 .PHONY: tf-e2e
 tf-e2e: tf-train tf-pipe tf-d-r  ## e2e pipeline from training to production tf on BentoML
@@ -70,4 +70,4 @@ tf-d:
 	cd bento_svc/tf_svc && docker build -t bento-tf-gpu:latest .
 
 tf-d-r:
-	docker run --gpus all -p 60051:5000 $(DEVICE_ARGS) bento-tf-gpu:latest
+	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-tf-gpu:latest
