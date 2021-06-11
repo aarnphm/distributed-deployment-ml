@@ -13,7 +13,7 @@ help: ## List of defined target
 	@grep -E '^[a-zA-Z_-]+:.*?##.*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 clean:
-	rm -rf bento_svc/*
+	rm -rf bentoml_service/*
 
 compose: ## run all services together
 	docker-compose up
@@ -31,7 +31,7 @@ onnx-pack:
 	cd $(ONNX_DIR) && CUDA_LAUNCH_BLOCKING=1 python3 bento_packer.py
 
 onnx-d:
-	cd bento_svc/onnx_svc && docker build -t bento-onnx-gpu:latest .
+	cd bentoml_service/onnx_svc && docker build -t bento-onnx-gpu:latest .
 
 onnx-d-r:
 	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-onnx-gpu:latest
@@ -49,7 +49,7 @@ torch-pack:
 	cd $(PYTORCH_DIR) && python3 bento_packer.py
 
 torch-d:
-	cd bento_svc/torch_svc && docker build -t bento-torch-gpu:latest .
+	cd bentoml_service/torch_svc && docker build -t bento-torch-gpu:latest .
 
 torch-d-r:
 	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-torch-gpu:latest
@@ -61,13 +61,13 @@ tf-train:
 	cd $(TENSORFLOW_DIR) && python3 train.py
 
 .PHONY: tf-pipe
-tf-pipe: tf-pack tf-d ## our tensorflow bento_svcment pipeline with bentoml
+tf-pipe: tf-pack tf-d ## our tensorflow bentoml_servicement pipeline with bentoml
 
 tf-pack:
 	cd $(TENSORFLOW_DIR) && python3 bento_packer.py
 
 tf-d:
-	cd bento_svc/tf_svc && docker build -t bento-tf-gpu:latest .
+	cd bentoml_service/tf_svc && docker build -t bento-tf-gpu:latest .
 
 tf-d-r:
 	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-tf-gpu:latest

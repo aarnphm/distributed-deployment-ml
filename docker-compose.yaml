@@ -1,38 +1,38 @@
 version: "3.7"
 services:
-  bento-tensorflow:
-    image: bento-tf-gpu:latest
+  bentoml-tensorflow:
+    image: bentoml-tf-gpu:latest
     build:
-      context: bento_svc/tf_svc
+      context: bentoml_service/tf_svc
       dockerfile: tf/Dockerfile
     ports:
-      - "50051:5000"
+      - "60000:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl
       - /dev/nvidia-modeset:/dev/nvidia-modeset
       - /dev/nvidia-uvm:/dev/nvidia-uvm
       - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
-  bento-pytorch:
-    image: bento-torch-gpu:latest
+  bentoml-pytorch:
+    image: bentoml-torch-gpu:latest
     build:
-      context: bento_svc/torch_svc
+      context: bentoml_service/torch_svc
       dockerfile: Dockerfile
     ports:
-      - "50052:5000"
+      - "60001:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl
       - /dev/nvidia-modeset:/dev/nvidia-modeset
       - /dev/nvidia-uvm:/dev/nvidia-uvm
       - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
-  bento-onnx:
-    image: bento-onnx-gpu:latest
+  bentoml-onnx:
+    image: bentoml-onnx-gpu:latest
     build:
-      context: bento_svc/onnx_svc
+      context: bentoml_service/onnx_svc
       dockerfile: Dockerfile
     ports:
-      - "50053:5000"
+      - "60003:5000"
     devices:
       - /dev/nvidia0:/dev/nvidia0
       - /dev/nvidiactl:/dev/nvidiactl

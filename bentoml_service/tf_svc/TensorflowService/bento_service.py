@@ -8,7 +8,7 @@ from tensorflow.keras.preprocessing.text import text_to_word_sequence
 from data import preprocess
 
 
-@env(pip_packages=['tensorflow', 'scikit-learn', 'pandas'], docker_base_image="bentoml/model-server:0.12.1-py38-gpu")
+@env(pip_packages=['scikit-learn', 'pandas'], docker_base_image="bentoml/model-server:0.12.1-py38-gpu")
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):

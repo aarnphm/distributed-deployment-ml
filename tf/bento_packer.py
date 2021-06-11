@@ -11,7 +11,7 @@ from bento_service import TensorflowService
 gpu = config.experimental.list_physical_devices('GPU')
 config.experimental.set_memory_growth(gpu[0], True)
 
-deploy_dir = "../bento_svc/tf_svc"
+deploy_dir = "../bentoml_service/tf_svc"
 
 if not os.path.exists(deploy_dir):
     os.makedirs(deploy_dir, exist_ok=True)
@@ -43,6 +43,8 @@ bento_svc.pack('model', model)
 bento_svc.pack('tokenizer', tokenizer)
 
 saved_path = bento_svc.save()
+
+print(bento_svc.name)
 
 copy_tree(saved_path, deploy_dir)
 

@@ -35,8 +35,6 @@ RUN ./bentoml-init.sh install_pip_packages
 COPY --chown=bentoml:bentoml docker-entrypoint.sh bundled_pip_dependencie[s]  ./bundled_pip_dependencies/
 RUN rm ./bundled_pip_dependencies/docker-entrypoint.sh && ./bentoml-init.sh install_bundled_pip_packages
 
-RUN pip3 install --no-cache-dir tensorflow==2.5.0 --use-feature=2020-resolver
-
 # copy over model files
 COPY --chown=bentoml:bentoml . ./
 

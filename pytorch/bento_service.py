@@ -8,7 +8,7 @@ import torch
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # cuda
 
 
-@env(infer_pip_packages=False, requirements_txt_file="./requirements.txt", docker_base_image="bentoml/model-server:0.12.1-py38-gpu")
+@env(infer_pip_packages=False, requirements_txt_file="./requirements.txt", docker_base_image="bentoml/model-server:0.12.1-slim-py38")
 @env(conda_dependencies=['pytorch', 'torchtext', 'cudatoolkit=11.1'], conda_channels=['pytorch', 'nvidia'],
      requirements_txt_file=None)
 @artifacts([PytorchModelArtifact("model"), PickleArtifact("tokenizer"), PickleArtifact("vocab")])

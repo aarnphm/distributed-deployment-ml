@@ -1,4 +1,4 @@
-# Generated BentoService bundle - TensorflowService:20210603124730_119C17
+# Generated BentoService bundle - TensorflowService:20210610164552_1778C1
 
 This is a ML Service bundle created with BentoML, it is not recommended to edit
 code or files contained in this directory. Instead, edit the code that uses BentoML

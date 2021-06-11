@@ -10,7 +10,7 @@ from helpers import TextClassificationModel, get_model_params, get_tokenizer_voc
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-deploy_dir = "../bento_svc/onnx_svc"
+deploy_dir = "../bentoml_service/onnx_svc"
 artifacts_dir = os.path.join(deploy_dir, "OnnxService")
 onnx_model_path = "../model/onnx/pytorch_model.onnx"
 
