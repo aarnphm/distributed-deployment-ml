@@ -1,9 +1,7 @@
 import os
-from distutils.dir_util import copy_tree
-# from distutils.file_util import copy_file
 
 import torch
-# import onnx
+import onnx
 
 from bento_service import OnnxService
 from helpers import TextClassificationModel, get_model_params, get_tokenizer_vocab
@@ -38,18 +36,15 @@ torch.onnx.export(model, inp, onnx_model_path, export_params=True, opset_version
                   input_names=["input"], output_names=["output"],
                   dynamic_axes={"input": {0: "vocab_size"}, "output": {0: "vocab_size"}})
 
-# print("\n Loading model to check...")
-# onnx_model = onnx.load(onnx_model_path)
-# onnx.checker.check_model(onnx_model)
+print("\n Loading model to check...")
+onnx_model = onnx.load(onnx_model_path)
+onnx.checker.check_model(onnx_model)
 
 bento_svc = OnnxService()
 bento_svc.pack("model", onnx_model_path)
 bento_svc.pack("tokenizer", tokenizer)
 bento_svc.pack("vocab", vocab)
 saved_path = bento_svc.save()
-
-copy_tree(saved_path, deploy_dir)
-# copy_file("Dockerfile", deploy_dir + "/Dockerfile")
 
 if __name__ == "__main__":
     print("\nExample run")

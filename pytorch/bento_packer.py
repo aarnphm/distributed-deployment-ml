@@ -1,7 +1,3 @@
-import os
-from distutils.dir_util import copy_tree
-# from distutils.file_util import copy_file
-
 import torch
 
 from bento_service import PytorchService
@@ -10,12 +6,6 @@ from train import get_model_params, get_tokenizer_vocab
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-trained_path = "../model/pytorch"
-deploy_dir = "../bentoml_service/torch_svc"
-artifacts_dir = os.path.join(deploy_dir, "PytorchService")
-
-if not os.path.exists(deploy_dir):
-    os.makedirs(deploy_dir, exist_ok=True)
 
 tokenizer, vocab = get_tokenizer_vocab()
 vocab_size, emsize, num_class = get_model_params(vocab)
@@ -29,10 +19,6 @@ bento_svc.pack("model", model)
 bento_svc.pack("tokenizer", tokenizer)
 bento_svc.pack("vocab", vocab)
 saved_path = bento_svc.save()
-
-copy_tree(saved_path, deploy_dir)
-# copy_file("Dockerfile", deploy_dir+"/Dockerfile")
-
 
 if __name__ == '__main__':
     print("\nExample run")

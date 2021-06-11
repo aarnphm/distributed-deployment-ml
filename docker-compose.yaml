@@ -2,9 +2,6 @@ version: "3.7"
 services:
   bentoml-tensorflow:
     image: bentoml-tf-gpu:latest
-    build:
-      context: bentoml_service/tf_svc
-      dockerfile: tf/Dockerfile
     ports:
       - "60000:5000"
     devices:
@@ -15,9 +12,6 @@ services:
       - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
   bentoml-pytorch:
     image: bentoml-torch-gpu:latest
-    build:
-      context: bentoml_service/torch_svc
-      dockerfile: Dockerfile
     ports:
       - "60001:5000"
     devices:
@@ -28,9 +22,6 @@ services:
       - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
   bentoml-onnx:
     image: bentoml-onnx-gpu:latest
-    build:
-      context: bentoml_service/onnx_svc
-      dockerfile: Dockerfile
     ports:
       - "60003:5000"
     devices:

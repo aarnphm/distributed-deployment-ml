@@ -3,17 +3,14 @@ TENSORFLOW_DIR=tf
 PYTORCH_DIR=pytorch
 ONNX_DIR=onnx
 
-# handles cgroup v2 changes and nvidia-docker caveats
+# handles cgroup v2 changes and nvidia-docker caveats  --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools
 ifeq (,$(wildcard, /etc/arch-release))
-	DEVICE_ARGS := --device /dev/nvidia0 --device /dev/nvidiactl --device /dev/nvidia-modeset --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools
+	DEVICE_ARGS := --device /dev/nvidia0 --device /dev/nvidiactl --device /dev/nvidia-modeset
 endif
 
 .PHONY: help
 help: ## List of defined target
 	@grep -E '^[a-zA-Z_-]+:.*?##.*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
-
-clean:
-	rm -rf bentoml_service/*
 
 compose: ## run all services together
 	docker-compose up
@@ -31,10 +28,10 @@ onnx-pack:
 	cd $(ONNX_DIR) && CUDA_LAUNCH_BLOCKING=1 python3 bento_packer.py
 
 onnx-d:
-	cd bentoml_service/onnx_svc && docker build -t bento-onnx-gpu:latest .
+	bentoml containerize OnnxService:latest -t bentoml-onnx-gpu:latest --verbose
 
 onnx-d-r:
-	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-onnx-gpu:latest
+	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bentoml-onnx-gpu:latest
 
 .PHONY: torch-e2e
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
@@ -49,10 +46,10 @@ torch-pack:
 	cd $(PYTORCH_DIR) && python3 bento_packer.py
 
 torch-d:
-	cd bentoml_service/torch_svc && docker build -t bento-torch-gpu:latest .
+	bentoml containerize PytorchService:latest -t bentoml-torch-gpu:latest --verbose
 
 torch-d-r:
-	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-torch-gpu:latest
+	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bentoml-torch-gpu:latest
 
 .PHONY: tf-e2e
 tf-e2e: tf-train tf-pipe tf-d-r  ## e2e pipeline from training to production tf on BentoML
@@ -67,7 +64,7 @@ tf-pack:
 	cd $(TENSORFLOW_DIR) && python3 bento_packer.py
 
 tf-d:
-	cd bentoml_service/tf_svc && docker build -t bento-tf-gpu:latest .
+	bentoml containerize TensorflowService:latest -t bentoml-tensorflow-gpu:latest --verbose
 
 tf-d-r:
-	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bento-tf-gpu:latest
+	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bentoml-tensorflow-gpu:latest

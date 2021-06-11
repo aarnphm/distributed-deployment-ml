@@ -1,2 +1,0 @@
-include OnnxService/bentoml.yml
-graft OnnxService/artifacts

@@ -1,2 +1,0 @@
-include TensorflowService/bentoml.yml
-graft TensorflowService/artifacts
