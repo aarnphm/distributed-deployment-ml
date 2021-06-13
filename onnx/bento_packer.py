@@ -1,5 +1,3 @@
-import os
-
 import torch
 import onnx
 
@@ -7,18 +5,11 @@ from bento_service import OnnxService
 from helpers import TextClassificationModel, get_model_params, get_tokenizer_vocab
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-deploy_dir = "../bentoml_service/onnx_svc"
-artifacts_dir = os.path.join(deploy_dir, "OnnxService")
 onnx_model_path = "../model/onnx/pytorch_model.onnx"
 
 
 # def tolong(tensor):
 #     return tensor.detach().long().to(device) if tensor.requires_grad else tensor.long().to(device)
-
-
-if not os.path.exists(deploy_dir):
-    os.makedirs(deploy_dir, exist_ok=True)
 
 tokenizer, vocab = get_tokenizer_vocab()
 vocab_size, embedding_size, num_class = get_model_params(vocab)

@@ -3,9 +3,9 @@ TENSORFLOW_DIR=tf
 PYTORCH_DIR=pytorch
 ONNX_DIR=onnx
 
-# handles cgroup v2 changes and nvidia-docker caveats  --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools
+# handles cgroup v2 changes and nvidia-docker caveats
 ifeq (,$(wildcard, /etc/arch-release))
-	DEVICE_ARGS := --device /dev/nvidia0 --device /dev/nvidiactl --device /dev/nvidia-modeset
+	DEVICE_ARGS := --device /dev/nvidia0 --device /dev/nvidiactl --device /dev/nvidia-modeset --device /dev/nvidia-uvm --device /dev/nvidia-uvm-tools
 endif
 
 .PHONY: help
@@ -31,7 +31,7 @@ onnx-d:
 	bentoml containerize OnnxService:latest -t bentoml-onnx-gpu:latest --verbose
 
 onnx-d-r:
-	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bentoml-onnx-gpu:latest
+	docker run --gpus all -p 50000:5000 $(DEVICE_ARGS) bentoml-onnx-gpu:latest
 
 .PHONY: torch-e2e
 torch-e2e: torch-train torch-pipe torch-d-r ## e2e pipeline from training to production torch on BentoML
@@ -49,7 +49,7 @@ torch-d:
 	bentoml containerize PytorchService:latest -t bentoml-torch-gpu:latest --verbose
 
 torch-d-r:
-	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bentoml-torch-gpu:latest
+	docker run --gpus all -p 50000:5000 $(DEVICE_ARGS) bentoml-torch-gpu:latest
 
 .PHONY: tf-e2e
 tf-e2e: tf-train tf-pipe tf-d-r  ## e2e pipeline from training to production tf on BentoML
@@ -67,4 +67,4 @@ tf-d:
 	bentoml containerize TensorflowService:latest -t bentoml-tensorflow-gpu:latest --verbose
 
 tf-d-r:
-	docker run --gpus all -p 5000:5000 $(DEVICE_ARGS) bentoml-tensorflow-gpu:latest
+	docker run --gpus all -p 50000:5000 $(DEVICE_ARGS) bentoml-tensorflow-gpu:latest
