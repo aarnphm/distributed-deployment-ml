@@ -7,8 +7,9 @@ from tensorflow.keras.preprocessing.text import tokenizer_from_json
 
 from bento_service import TensorflowService
 
-gpu = config.experimental.list_physical_devices('GPU')
-config.experimental.set_memory_growth(gpu[0], True)
+# gpu = config.experimental.list_physical_devices('GPU')
+# print(gpu)
+# config.experimental.set_memory_growth(gpu[0], True)
 
 
 def load_tokenizer():
