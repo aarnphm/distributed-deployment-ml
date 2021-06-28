@@ -4,14 +4,14 @@ from bentoml.frameworks.keras import KerasModelArtifact
 from bentoml.service.artifacts.common import PickleArtifact
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import text_to_word_sequence
-from prometheus_client import Summary
 
 from data import preprocess
 
+from prometheus_client import Summary
 TEST_METRICS=Summary('request_processing_time', 'Time spend processing request')
 
 
-@env(pip_packages=['scikit-learn', 'pandas', 'tensorflow'], docker_base_image="bentoml/model-server:0.12.1-py38-gpu")
+@env(pip_packages=['scikit-learn', 'pandas', 'tensorflow'], docker_base_image="model-server:0.13.0-python3.7-slim-cudnn")
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):
