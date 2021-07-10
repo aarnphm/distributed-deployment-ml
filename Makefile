@@ -64,7 +64,7 @@ tf-pack:
 	cd $(TENSORFLOW_DIR) && python3 bento_packer.py
 
 tf-d:
-	bentoml containerize TensorflowService:latest -t bentoml-tensorflow-gpu:latest --verbose
+	bentoml containerize TensorflowService:latest -t bentoml-tensorflow-gpu:latest
 
 tf-d-r:
 	docker run --gpus all -p 50000:5000 $(DEVICE_ARGS) bentoml-tensorflow-gpu:latest

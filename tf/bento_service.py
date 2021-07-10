@@ -7,11 +7,8 @@ from tensorflow.keras.preprocessing.text import text_to_word_sequence
 
 from data import preprocess
 
-from prometheus_client import Summary
-TEST_METRICS=Summary('request_processing_time', 'Time spend processing request')
 
-
-@env(pip_packages=['scikit-learn', 'pandas', 'tensorflow'], docker_base_image="model-server:0.13.0-python3.7-slim-cudnn")
+@env(pip_packages=['scikit-learn', 'pandas', 'tensorflow'], docker_base_image="aarnphm/model-server:0.13.0-python3.7-slim-cudnn")
 @artifacts([KerasModelArtifact('model'), PickleArtifact('tokenizer')])
 class TensorflowService(BentoService):
     def word_to_index(self, word):
@@ -25,7 +22,6 @@ class TensorflowService(BentoService):
         tokens = list(map(self.word_to_index, proc))
         return tokens
 
-    @TEST_METRICS.time()
     @api(input=JsonInput())
     def predict(self, parsed_json):
         raw = self.preprocessing(parsed_json['text'])
