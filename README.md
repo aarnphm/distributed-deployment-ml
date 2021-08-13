@@ -2,6 +2,10 @@
 <i>Case study integrating GPU support for BentoML</i>
 <hr>
 
+## NOTES:
+
+This no longer applies for BentoML releases after 1.0. Mainly for prototyping pre 1.0
+
 ## Docker images cycle releases
 
 ### <b>NVIDIA Triton Server</b>
