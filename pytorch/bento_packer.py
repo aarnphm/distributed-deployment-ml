@@ -1,4 +1,6 @@
 import torch
+import inspect
+from pprint import pprint
 
 from bento_service import PytorchService
 from model import TextClassificationModel
@@ -10,6 +12,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 tokenizer, vocab = get_tokenizer_vocab()
 vocab_size, emsize, num_class = get_model_params(vocab)
 model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
+# pprint(inspect.getmembers(model, lambda a:not(inspect.isroutine(a))))
 model.load_state_dict(torch.load("../model/pytorch/pytorch_model.pt"))
 model.eval()
 
