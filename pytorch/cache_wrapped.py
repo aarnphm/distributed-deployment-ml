@@ -184,7 +184,7 @@ class TransformersRunnable(Runnable):
     def load_pipeline(self, tasks):
         transformers_dict = TransformersModel.load(self._model_identifier)
         model, tokenizer = transformers_dict.values()
-        transformers.check_tasks(tasks)
+        transformers.pipelines.check_task(tasks)
         runnable_pipeline = transformers.pipeline(tasks, model=model, tokenizer=tokenizer)
         return runnable_pipeline
 
