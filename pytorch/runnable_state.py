@@ -90,7 +90,7 @@ else:
 
 class Runnable(metaclass=RunnableMeta):
     if t.TYPE_CHECKING:
-        # this stub makes sure pyright acceptsso we want to check  constructor arguments.
+        # this stub makes sure pyright accept so we want to check  constructor arguments.
         def __init__(*args, **kwargs):
             ...
 
@@ -146,4 +146,3 @@ class Runnable(metaclass=RunnableMeta):
             finally:
                 self._state.in_setup = False
                 self._state.setup_called = True
-
