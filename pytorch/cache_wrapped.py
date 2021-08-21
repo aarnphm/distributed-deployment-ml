@@ -155,7 +155,6 @@ class XgboostRunnable(Runnable):
         res = self._method_call(dm)
         return np.asarray(res)
 
-
     def run_batch(self, input_data: t.Union[xgb.DMatrix, pd.DataFrame, np.array]) -> np.array:
         if not isinstance(input_data, xgb.DMatrix):
             dm = xgb.DMatrix(input_data)
