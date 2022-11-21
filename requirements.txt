@@ -5,7 +5,7 @@ bentoml
 pandas~=1.2.2
 scikit-learn~=0.24.1
 spacy~=3.0.6
-tensorflow~=2.5.0
+tensorflow~=2.9.3
 setuptools~=49.2.1
 pip~=21.1.2
 transformers
